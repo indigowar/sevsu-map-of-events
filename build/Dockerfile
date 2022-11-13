@@ -15,6 +15,7 @@ WORKDIR /app
 COPY --from=builder /go/bin/eventmap .
 
 RUN chmod +x ./eventmap
+RUN ls -la
 
 EXPOSE 8000
 

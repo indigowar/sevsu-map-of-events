@@ -1,9 +1,10 @@
 package config
 
 import (
-	"github.com/spf13/viper"
 	"os"
 	"time"
+
+	"github.com/spf13/viper"
 )
 
 const (
@@ -23,6 +24,11 @@ type (
 	}
 
 	PostgresConfig struct {
+		Name     string
+		User     string
+		Password string
+		Host     string
+		Port     string
 	}
 
 	Config struct {
@@ -84,4 +90,10 @@ func unmarshal(c *Config) error {
 
 func setFromEnv(c *Config) {
 	c.Environment = os.Getenv("APP_ENV")
+
+	c.Postgres.Name = os.Getenv("POSTGRES_DB_NAME")
+	c.Postgres.User = os.Getenv("POSTGRES_DB_USER")
+	c.Postgres.Password = os.Getenv("POSTGRES_DB_PASSWORD")
+	c.Postgres.Host = os.Getenv("POSTGRES_DB_HOST")
+	c.Postgres.Port = os.Getenv("POSTGRES_DB_PORT")
 }

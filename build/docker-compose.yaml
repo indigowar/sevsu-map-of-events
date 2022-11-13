@@ -5,8 +5,8 @@ services:
     build:
       context: ../.
       dockerfile: ./build/Dockerfile
-    environment:
-      APP_ENV: 'local'
+    env_file:
+      - ../.env
 
     ports:
       - '8000:8000'
