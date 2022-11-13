@@ -14,8 +14,8 @@ type (
 		FoundingRange() uuid.UUID
 		CoFoundingRange() uuid.UUID
 		SubmissionDeadline() time.Time
-		ConsiderationPeriod() time.Duration
-		RealisationPeriod() time.Duration
+		ConsiderationPeriod() string
+		RealisationPeriod() string
 		Result() string
 		Site() string
 		Document() string
@@ -32,8 +32,8 @@ type (
 		foundingRange       uuid.UUID
 		coFoundingRange     uuid.UUID
 		submissionDeadline  time.Time
-		considerationPeriod time.Duration
-		realisationPeriod   time.Duration
+		considerationPeriod string
+		realisationPeriod   string
 		result              string
 		site                string
 		document            string
@@ -67,11 +67,11 @@ func (e event) SubmissionDeadline() time.Time {
 	return e.submissionDeadline
 }
 
-func (e event) ConsiderationPeriod() time.Duration {
+func (e event) ConsiderationPeriod() string {
 	return e.considerationPeriod
 }
 
-func (e event) RealisationPeriod() time.Duration {
+func (e event) RealisationPeriod() string {
 	return e.realisationPeriod
 }
 
@@ -103,7 +103,7 @@ func (e event) Competitors() []uuid.UUID {
 	return e.competitors
 }
 
-func NewEvent(title string, organizer uuid.UUID, foundingRange uuid.UUID, coFoundingRange uuid.UUID, submissionDeadline time.Time, considerationPeriod time.Duration, realisationPeriod time.Duration, result string, site string, document string, internalContacts string, tlr int, subjects []uuid.UUID, competitors []uuid.UUID) Event {
+func NewEvent(title string, organizer uuid.UUID, foundingRange uuid.UUID, coFoundingRange uuid.UUID, submissionDeadline time.Time, considerationPeriod string, realisationPeriod string, result string, site string, document string, internalContacts string, tlr int, subjects []uuid.UUID, competitors []uuid.UUID) Event {
 	return &event{
 		id:                  uuid.New(),
 		title:               title,
