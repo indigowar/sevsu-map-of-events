@@ -14,12 +14,6 @@ CREATE TABLE organizer
     FOREIGN KEY (level) REFERENCES organizer_level (id)
 );
 
-CREATE TABLE subject
-(
-    id   UUID PRIMARY KEY,
-    name VARCHAR(255) NOT NULL
-);
-
 CREATE TABLE competitor
 (
     id   UUID PRIMARY KEY,
