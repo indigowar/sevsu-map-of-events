@@ -11,6 +11,7 @@ type (
 		ID() uuid.UUID
 		Title() string
 		Organizer() uuid.UUID
+		FoundingType() string
 		FoundingRange() uuid.UUID
 		CoFoundingRange() uuid.UUID
 		SubmissionDeadline() time.Time
@@ -20,7 +21,7 @@ type (
 		Site() string
 		Document() string
 		InternalContacts() string
-		TLR() int
+		TRL() int
 		Subjects() []uuid.UUID
 		Competitors() []uuid.UUID
 	}
@@ -29,6 +30,7 @@ type (
 		id                  uuid.UUID
 		title               string
 		organizer           uuid.UUID
+		foundingType        string
 		foundingRange       uuid.UUID
 		coFoundingRange     uuid.UUID
 		submissionDeadline  time.Time
@@ -38,7 +40,7 @@ type (
 		site                string
 		document            string
 		internalContacts    string
-		tlr                 int
+		trl                 int
 		subjects            []uuid.UUID
 		competitors         []uuid.UUID
 	}
@@ -54,6 +56,10 @@ func (e event) Title() string {
 
 func (e event) Organizer() uuid.UUID {
 	return e.organizer
+}
+
+func (e event) FoundingType() string {
+	return e.foundingType
 }
 
 func (e event) FoundingRange() uuid.UUID {
@@ -91,8 +97,8 @@ func (e event) InternalContacts() string {
 	return e.internalContacts
 }
 
-func (e event) TLR() int {
-	return e.tlr
+func (e event) TRL() int {
+	return e.trl
 }
 
 func (e event) Subjects() []uuid.UUID {
@@ -103,11 +109,12 @@ func (e event) Competitors() []uuid.UUID {
 	return e.competitors
 }
 
-func NewEvent(title string, organizer uuid.UUID, foundingRange uuid.UUID, coFoundingRange uuid.UUID, submissionDeadline time.Time, considerationPeriod string, realisationPeriod string, result string, site string, document string, internalContacts string, tlr int, subjects []uuid.UUID, competitors []uuid.UUID) Event {
+func NewEvent(title string, organizer uuid.UUID, foundingType string, foundingRange uuid.UUID, coFoundingRange uuid.UUID, submissionDeadline time.Time, considerationPeriod string, realisationPeriod string, result string, site string, document string, internalContacts string, tlr int, subjects []uuid.UUID, competitors []uuid.UUID) Event {
 	return &event{
 		id:                  uuid.New(),
 		title:               title,
 		organizer:           organizer,
+		foundingType:        foundingType,
 		foundingRange:       foundingRange,
 		coFoundingRange:     coFoundingRange,
 		submissionDeadline:  submissionDeadline,
@@ -117,7 +124,7 @@ func NewEvent(title string, organizer uuid.UUID, foundingRange uuid.UUID, coFoun
 		site:                site,
 		document:            document,
 		internalContacts:    internalContacts,
-		tlr:                 tlr,
+		trl:                 tlr,
 		subjects:            subjects,
 		competitors:         competitors}
 }
