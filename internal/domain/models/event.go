@@ -22,7 +22,6 @@ type (
 		Document() string
 		InternalContacts() string
 		TRL() int
-		Subjects() []uuid.UUID
 		Competitors() []uuid.UUID
 	}
 
@@ -41,7 +40,6 @@ type (
 		document            string
 		internalContacts    string
 		trl                 int
-		subjects            []uuid.UUID
 		competitors         []uuid.UUID
 	}
 )
@@ -101,15 +99,25 @@ func (e event) TRL() int {
 	return e.trl
 }
 
-func (e event) Subjects() []uuid.UUID {
-	return e.subjects
-}
-
 func (e event) Competitors() []uuid.UUID {
 	return e.competitors
 }
 
-func NewEvent(title string, organizer uuid.UUID, foundingType string, foundingRange uuid.UUID, coFoundingRange uuid.UUID, submissionDeadline time.Time, considerationPeriod string, realisationPeriod string, result string, site string, document string, internalContacts string, tlr int, subjects []uuid.UUID, competitors []uuid.UUID) Event {
+func NewEvent(title string,
+	organizer uuid.UUID,
+	foundingType string,
+	foundingRange uuid.UUID,
+	coFoundingRange uuid.UUID,
+	submissionDeadline time.Time,
+	considerationPeriod string,
+	realisationPeriod string,
+	result string,
+	site string,
+	document string,
+	internalContacts string,
+	tlr int,
+	competitors []uuid.UUID,
+) Event {
 	return &event{
 		id:                  uuid.New(),
 		title:               title,
@@ -125,6 +133,5 @@ func NewEvent(title string, organizer uuid.UUID, foundingType string, foundingRa
 		document:            document,
 		internalContacts:    internalContacts,
 		trl:                 tlr,
-		subjects:            subjects,
 		competitors:         competitors}
 }
