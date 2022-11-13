@@ -6,21 +6,18 @@ type (
 	Subject interface {
 		ID() uuid.UUID
 		Name() string
-		Event() uuid.UUID
 	}
 
 	subject struct {
-		id    uuid.UUID
-		name  string
-		event uuid.UUID
+		id   uuid.UUID
+		name string
 	}
 )
 
-func NewSubject(name string, event uuid.UUID) Subject {
+func NewSubject(name string) Subject {
 	return &subject{
-		id:    uuid.New(),
-		name:  name,
-		event: event,
+		id:   uuid.New(),
+		name: name,
 	}
 }
 
@@ -30,8 +27,4 @@ func (s *subject) ID() uuid.UUID {
 
 func (s *subject) Name() string {
 	return s.name
-}
-
-func (s *subject) Event() uuid.UUID {
-	return s.event
 }

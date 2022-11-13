@@ -23,6 +23,7 @@ type (
 		InternalContacts() string
 		TRL() int
 		Competitors() []uuid.UUID
+		Subjects() []uuid.UUID
 	}
 
 	event struct {
@@ -41,6 +42,7 @@ type (
 		internalContacts    string
 		trl                 int
 		competitors         []uuid.UUID
+		subjects            []uuid.UUID
 	}
 )
 
@@ -103,6 +105,10 @@ func (e event) Competitors() []uuid.UUID {
 	return e.competitors
 }
 
+func (e event) Subjects() []uuid.UUID {
+	return e.subjects
+}
+
 func NewEvent(title string,
 	organizer uuid.UUID,
 	foundingType string,
@@ -117,6 +123,7 @@ func NewEvent(title string,
 	internalContacts string,
 	tlr int,
 	competitors []uuid.UUID,
+	subjects []uuid.UUID,
 ) Event {
 	return &event{
 		id:                  uuid.New(),
@@ -133,5 +140,7 @@ func NewEvent(title string,
 		document:            document,
 		internalContacts:    internalContacts,
 		trl:                 tlr,
-		competitors:         competitors}
+		competitors:         competitors,
+		subjects:            subjects,
+	}
 }
