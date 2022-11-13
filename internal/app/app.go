@@ -18,14 +18,12 @@ import (
 func Run(cfg *config.Config) {
 	r := gin.New()
 
-	// urlExample := "postgres://username:password@localhost:5432/database_name"
 	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
 		cfg.Postgres.User,
 		cfg.Postgres.Password,
 		cfg.Postgres.Host,
 		cfg.Postgres.Port,
-		cfg.Postgres.Name,
-	)
+		cfg.Postgres.Name)
 
 	p, err := pgxpool.New(context.Background(), url)
 
