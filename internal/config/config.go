@@ -15,7 +15,7 @@ type (
 	}
 )
 
-func Init(configDir) (*Config, error) {
+func Init(configDir string) (*Config, error) {
 	populateDefaults()
 
 	if err := parseConfigFile(configDir, os.Getenv("APP_ENV")); err != nil {
