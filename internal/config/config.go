@@ -83,5 +83,5 @@ func unmarshal(c *Config) error {
 }
 
 func setFromEnv(c *Config) {
-	c.Environment = os.Getenv("ENV")
+	c.Environment = os.Getenv("APP_ENV")
 }
