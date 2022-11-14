@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
 
@@ -41,6 +42,8 @@ func Run(cfg *config.Config) {
 	competitorService := services.NewCompetitorService(competitorStorage)
 
 	r := gin.Default()
+
+	r.Use(cors.Default())
 
 	r.GET("api/v1/competitor", json.GetAllCompetitorsHandler(competitorService))
 	r.POST("api/v1/competitor", json.CreateCompetitorHandler(competitorService))
