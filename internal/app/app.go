@@ -40,8 +40,13 @@ func Run(cfg *config.Config) {
 	}
 	organizerStorage, _ := storages.NewPostgresOrganizerStorage(conn)
 
+	foundingRangeStorage := storages.NewFoundingRangePostgresStorage(conn)
+	coFoundingRangeStorage := storages.NewCoFoundingRangePostgresStorage(conn)
+
 	competitorService := services.NewCompetitorService(competitorStorage)
 	organizerService, _ := services.NewOrganizerService(organizerStorage)
+	foundingService := services.NewFoundingRangeService(foundingRangeStorage)
+	coFoundingService := services.NewCoFoundingRangeService(coFoundingRangeStorage)
 
 	r := gin.Default()
 
@@ -49,6 +54,12 @@ func Run(cfg *config.Config) {
 
 	r.GET("api/v1/competitor", json.GetAllCompetitorsHandler(competitorService))
 	r.POST("api/v1/competitor", json.CreateCompetitorHandler(competitorService))
+
+	r.GET("/api/v1/founding_range/:id", json.GetByIDRangeHandler(foundingService))
+	r.GET("/api/v1/founding_range", json.GetMaximumRangeHandler(foundingService))
+
+	r.GET("/api/v1/co_founding_range/:id", json.GetByIDRangeHandler(coFoundingService))
+	r.GET("/api/v1/co_founding_range", json.GetMaximumRangeHandler(coFoundingService))
 
 	r.GET("api/v1/organizer_level", json.GetAllOrganizerLevelsHandler(organizerService))
 	r.POST("api/v1/organizer_level", json.CreateOrganizerLevelHandler(organizerService))
