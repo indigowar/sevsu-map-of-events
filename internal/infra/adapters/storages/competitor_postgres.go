@@ -21,7 +21,7 @@ func (s PostgresCompetitorStorage) Get(ctx context.Context, id uuid.UUID) (model
 	var Id uuid.UUID
 	var name string
 
-	query := fmt.Sprintf("SELECT * FROM competitor WHERE id == '%s'", id.String())
+	query := fmt.Sprintf("SELECT * FROM competitor WHERE competitor_id == '%s'", id.String())
 
 	if err := s.con.QueryRow(ctx, query).Scan(&Id, &name); err != nil {
 		log.Println("Got query error or scan error: ", err)
@@ -59,7 +59,7 @@ func (s PostgresCompetitorStorage) GetAll(ctx context.Context) ([]models.Competi
 }
 
 func (s PostgresCompetitorStorage) Create(ctx context.Context, competitor models.Competitor) error {
-	command := "INSERT INTO competitor (id, name) VALUES ($1, $2)"
+	command := "INSERT INTO competitor (competitor_id, competitor_name) VALUES ($1, $2)"
 	if _, err := s.con.Exec(ctx, command, competitor.ID(), competitor.Name()); err != nil {
 		log.Println(err)
 		return errors.New("failed to create new competitor")
@@ -68,7 +68,7 @@ func (s PostgresCompetitorStorage) Create(ctx context.Context, competitor models
 }
 
 func (s PostgresCompetitorStorage) Update(ctx context.Context, competitor models.Competitor) error {
-	command := "UPDATE competitor SET name = $2 WHERE id = $1"
+	command := "UPDATE competitor SET competitor_name = $2 WHERE competitor_id = $1"
 	if _, err := s.con.Exec(ctx, command, competitor.ID(), competitor.Name()); err != nil {
 		log.Println(err)
 		return errors.New("failed to update a competitor")
@@ -77,7 +77,7 @@ func (s PostgresCompetitorStorage) Update(ctx context.Context, competitor models
 }
 
 func (s PostgresCompetitorStorage) Delete(ctx context.Context, id uuid.UUID) error {
-	_, err := s.con.Exec(ctx, "DELETE FROM competitor WHERE id = $1", id)
+	_, err := s.con.Exec(ctx, "DELETE FROM competitor WHERE competitor_id = $1", id)
 	return err
 }
 
