@@ -17,5 +17,5 @@ type OrganizerStorageRepository interface {
 
 	GetLevels(ctx context.Context) ([]models.OrganizerLevel, error)
 	AddLevel(ctx context.Context, level models.OrganizerLevel) error
-	DeleteLevel(ctx context.Context, id uuid.UUID, replacement uuid.UUID) error
+	DeleteLevel(ctx context.Context, id uuid.UUID) error
 }

@@ -16,9 +16,9 @@ type (
 	}
 )
 
-func NewOrganizerLevel(name string, code string) OrganizerLevel {
+func NewOrganizerLevel(id uuid.UUID, name string, code string) OrganizerLevel {
 	return &organizerLevel{
-		id:   uuid.New(),
+		id:   id,
 		name: name,
 		code: code,
 	}
