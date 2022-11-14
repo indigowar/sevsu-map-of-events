@@ -21,7 +21,7 @@ func (s foundingRangeStorage) GetByID(ctx context.Context, id uuid.UUID) (models
 	var Id uuid.UUID
 	var low, high int
 
-	query := fmt.Sprintf("SELECT * FROM founding_range WHERE id = '%s'", id.String())
+	query := fmt.Sprintf("SELECT * FROM founding_range WHERE founding_range_id = '%s'", id.String())
 
 	if err := s.con.QueryRow(ctx, query).Scan(&Id, &low, &high); err != nil {
 		log.Println("Got query error or scan error: ", err)
@@ -33,15 +33,15 @@ func (s foundingRangeStorage) GetByID(ctx context.Context, id uuid.UUID) (models
 
 func (s foundingRangeStorage) GetMaximumRange(ctx context.Context) (models.FoundingRange, error) {
 	var low, high int
-	if s.con.QueryRow(ctx, "SELECT MIN(low) FROM founding_range").Scan(&low) != nil ||
-		s.con.QueryRow(ctx, "SELECT MAX(high) FROM founding_range").Scan(&high) != nil {
+	if s.con.QueryRow(ctx, "SELECT MIN(founding_range_low) FROM founding_range").Scan(&low) != nil ||
+		s.con.QueryRow(ctx, "SELECT MAX(founding_range_high) FROM founding_range").Scan(&high) != nil {
 		return nil, errors.New("failed to read database")
 	}
 	return models.NewRange(uuid.UUID{}, low, high), nil
 }
 
 func (s foundingRangeStorage) Create(ctx context.Context, foundingRange models.FoundingRange) (models.FoundingRange, error) {
-	command := "INSERT INTO founding_range (id, low, high) VALUES ($1, $2, $3)"
+	command := "INSERT INTO founding_range (founding_range_id, founding_range_low, founding_range_high) VALUES ($1, $2, $3)"
 
 	_, err := s.con.Exec(ctx, command, foundingRange.ID(), foundingRange.Low(), foundingRange.High())
 	if err != nil {
@@ -53,7 +53,7 @@ func (s foundingRangeStorage) Create(ctx context.Context, foundingRange models.F
 }
 
 func (s foundingRangeStorage) Delete(ctx context.Context, id uuid.UUID) error {
-	if _, err := s.con.Exec(ctx, "DELETE FROM founding_range WHERE id = $1", id); err != nil {
+	if _, err := s.con.Exec(ctx, "DELETE FROM founding_range WHERE founding_range_id = $1", id); err != nil {
 		log.Println(err)
 		return errors.New("failed to delete from database")
 	}
