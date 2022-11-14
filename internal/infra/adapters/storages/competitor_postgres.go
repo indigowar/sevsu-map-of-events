@@ -47,10 +47,12 @@ func (s PostgresCompetitorStorage) GetAll(ctx context.Context) ([]models.Competi
 			return nil, err
 		}
 
-		id := values[0].(uuid.UUID)
+		id := values[0].([16]byte)
 		name := values[1].(string)
 
-		comps = append(comps, models.NewCompetitor(id, name))
+		parsedId, _ := uuid.FromBytes(id[:])
+
+		comps = append(comps, models.NewCompetitor(parsedId, name))
 	}
 
 	return comps, nil
