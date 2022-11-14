@@ -30,7 +30,7 @@ func NewPostgresOrganizerStorage(conn *pgx.Conn) (storages.OrganizerStorageRepos
 func (s PostgresOrganizerStorage) GetByID(ctx context.Context, id uuid.UUID) (models.Organizer, error) {
 	var Id, level uuid.UUID
 	var name, logo string
-	err := s.conn.QueryRow(ctx, fmt.Sprintf("SELECT * FROM organizer WHERE id == '%s'", id.String())).Scan(&Id, &name, &logo, &level)
+	err := s.conn.QueryRow(ctx, fmt.Sprintf("SELECT * FROM organizer WHERE organizer_id = '%s'", id.String())).Scan(&Id, &name, &logo, &level)
 	if err != nil {
 		log.Println("Failed to read to database")
 		return nil, err
@@ -66,7 +66,7 @@ func (s PostgresOrganizerStorage) GetAll(ctx context.Context) ([]models.Organize
 }
 
 func (s PostgresOrganizerStorage) Create(ctx context.Context, organizer models.Organizer) error {
-	command := "INSERT INTO organizer (id, name, logo, level) VALUES ($1, $2, $3, $4)"
+	command := "INSERT INTO organizer (organizer_id, organizer_name, organizer_image, organizer_level) VALUES ($1, $2, $3, $4)"
 
 	if _, err := s.conn.Exec(ctx, command, organizer.ID(), organizer.Name(), organizer.Logo(), organizer.Level()); err != nil {
 		log.Println(err)
@@ -76,12 +76,12 @@ func (s PostgresOrganizerStorage) Create(ctx context.Context, organizer models.O
 }
 
 func (s PostgresOrganizerStorage) Delete(ctx context.Context, id uuid.UUID) error {
-	_, err := s.conn.Exec(ctx, "DELETE FROM organizer WHERE id=$1", id)
+	_, err := s.conn.Exec(ctx, "DELETE FROM organizer WHERE organizer_id=$1", id)
 	return err
 }
 
 func (s PostgresOrganizerStorage) Update(ctx context.Context, organizer models.Organizer) error {
-	command := "UPDATE organizer SET name = $2, logo = $3, level = $4 WHERE id = $1"
+	command := "UPDATE organizer SET organizer_name = $2, organizer_image = $3, organizer_level = $4 WHERE organizer_id = $1"
 
 	if _, err := s.conn.Exec(ctx, command, organizer.ID(), organizer.Name(), organizer.Logo(), organizer.Level()); err != nil {
 		log.Println(err)
@@ -120,7 +120,7 @@ func (s PostgresOrganizerStorage) GetLevels(ctx context.Context) ([]models.Organ
 }
 
 func (s PostgresOrganizerStorage) AddLevel(ctx context.Context, level models.OrganizerLevel) error {
-	command := "INSERT INTO organizer_level(id, name, code) VALUES ($1, $2, $3)"
+	command := "INSERT INTO organizer_level(organizer_level_id, organizer_level_name, organizer_level_code) VALUES ($1, $2, $3)"
 
 	if _, err := s.conn.Exec(ctx, command, level.ID(), level.Name(), level.Code()); err != nil {
 		log.Println(err)
@@ -130,7 +130,7 @@ func (s PostgresOrganizerStorage) AddLevel(ctx context.Context, level models.Org
 }
 
 func (s PostgresOrganizerStorage) DeleteLevel(ctx context.Context, id uuid.UUID) error {
-	command := "DELETE FROM organizer_level WHERE id=$1"
+	command := "DELETE FROM organizer_level WHERE organizer_level_id = $1"
 
 	if _, err := s.conn.Exec(ctx, command, id); err != nil {
 		log.Println(err)
