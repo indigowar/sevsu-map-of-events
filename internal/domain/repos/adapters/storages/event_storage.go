@@ -15,4 +15,8 @@ type EventStorageRepository interface {
 	Create(ctx context.Context, event models.Event) error
 	Delete(ctx context.Context, id uuid.UUID) error
 	Update(ctx context.Context, event models.Event) error
+
+	AddSubject(ctx context.Context, id, subjectId uuid.UUID) error
+	RemoveSubject(ctx context.Context, id, subjectId uuid.UUID) error
+	AddCompetitor(ctx context.Context, id, competitorId uuid.UUID) error
 }
