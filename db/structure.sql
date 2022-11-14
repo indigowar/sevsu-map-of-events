@@ -37,6 +37,7 @@ CREATE TABLE co_founding_range
 CREATE TABLE event
 (
     event_id                   UUID PRIMARY KEY,
+    title                      VARCHAR(255)  NOT NULL,
     event_organizer            UUID          NOT NULL,
     FOREIGN KEY (event_organizer) REFERENCES organizer (organizer_id),
     event_founding_type        VARCHAR(1024) NOT NULL,

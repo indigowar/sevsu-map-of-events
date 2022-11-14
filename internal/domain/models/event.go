@@ -109,7 +109,9 @@ func (e event) Subjects() []uuid.UUID {
 	return e.subjects
 }
 
-func NewEvent(title string,
+func NewEvent(
+	id uuid.UUID,
+	title string,
 	organizer uuid.UUID,
 	foundingType string,
 	foundingRange uuid.UUID,
@@ -126,7 +128,7 @@ func NewEvent(title string,
 	subjects []uuid.UUID,
 ) Event {
 	return &event{
-		id:                  uuid.New(),
+		id:                  id,
 		title:               title,
 		organizer:           organizer,
 		foundingType:        foundingType,
