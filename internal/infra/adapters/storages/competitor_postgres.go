@@ -32,8 +32,28 @@ func (storage PostgresCompetitorStorage) Get(ctx context.Context, id uuid.UUID) 
 }
 
 func (storage PostgresCompetitorStorage) GetAll(ctx context.Context) ([]models.Competitor, error) {
-	//TODO implement me
-	panic("implement me")
+	comps := make([]models.Competitor, 0)
+
+	rows, err := storage.con.Query(ctx, "SELECT * FROM competitor")
+	if err != nil {
+		log.Println("Failed to read from database")
+		return nil, err
+	}
+
+	for rows.Next() {
+		values, err := rows.Values()
+		if err != nil {
+			log.Println("Failed to read fetched value from database")
+			return nil, err
+		}
+
+		id := values[0].(uuid.UUID)
+		name := values[1].(string)
+
+		comps = append(comps, models.NewCompetitor(id, name))
+	}
+
+	return comps, nil
 }
 
 func (storage PostgresCompetitorStorage) Create(ctx context.Context, competitor models.Competitor) error {
