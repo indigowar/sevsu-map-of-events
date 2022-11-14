@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5"
 
 	"github.com/indigowar/map-of-events/internal/config"
 )
@@ -24,13 +24,13 @@ func Run(cfg *config.Config) {
 		cfg.Postgres.Host,
 		cfg.Postgres.Port,
 		cfg.Postgres.Name)
-
-	p, err := pgxpool.New(context.Background(), url)
+	log.Println(url)
+	conn, err := pgx.Connect(context.Background(), url)
 
 	if err != nil {
 		log.Fatalln(err)
 	}
-	defer p.Close()
+	defer conn.Close(context.Background())
 
 	server := &http.Server{
 		Handler:        r,
