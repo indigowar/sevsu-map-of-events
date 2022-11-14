@@ -27,7 +27,7 @@ func ValidateRange(r models.FoundingRange) error {
 	return nil
 }
 
-func ValidatePercentRange(r models.CoFoundingRange) error {
+func ValidatePercentRange(r models.FoundingRange) error {
 	high := r.High()
 	low := r.Low()
 
