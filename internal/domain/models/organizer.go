@@ -36,9 +36,9 @@ func (o organizer) Level() uuid.UUID {
 	return o.level
 }
 
-func NewOrganizer(name, logo string, level uuid.UUID) Organizer {
+func NewOrganizer(id uuid.UUID, name, logo string, level uuid.UUID) Organizer {
 	return &organizer{
-		id:    uuid.New(),
+		id:    id,
 		name:  name,
 		logo:  logo,
 		level: level,
