@@ -32,9 +32,9 @@ func (f foundingRange) High() int {
 	return f.high
 }
 
-func NewRange(low int, high int) FoundingRange {
+func NewRange(id uuid.UUID, low int, high int) FoundingRange {
 	return &foundingRange{
-		id:   uuid.New(),
+		id:   id,
 		low:  low,
 		high: high,
 	}
