@@ -14,9 +14,9 @@ type (
 	}
 )
 
-func NewCompetitor(name string) Competitor {
+func NewCompetitor(id uuid.UUID, name string) Competitor {
 	return &competitor{
-		id:   uuid.New(),
+		id:   id,
 		name: name,
 	}
 }
