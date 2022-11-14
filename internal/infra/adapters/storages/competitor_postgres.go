@@ -17,13 +17,13 @@ type PostgresCompetitorStorage struct {
 	con *pgx.Conn
 }
 
-func (storage PostgresCompetitorStorage) Get(ctx context.Context, id uuid.UUID) (models.Competitor, error) {
+func (s PostgresCompetitorStorage) Get(ctx context.Context, id uuid.UUID) (models.Competitor, error) {
 	var Id uuid.UUID
 	var name string
 
 	query := fmt.Sprintf("SELECT * FROM competitor WHERE id == '%s'", id.String())
 
-	if err := storage.con.QueryRow(ctx, query).Scan(&Id, &name); err != nil {
+	if err := s.con.QueryRow(ctx, query).Scan(&Id, &name); err != nil {
 		log.Println("Got query error or scan error: ", err)
 		return nil, err
 	}
@@ -31,10 +31,10 @@ func (storage PostgresCompetitorStorage) Get(ctx context.Context, id uuid.UUID) 
 	return models.NewCompetitor(Id, name), nil
 }
 
-func (storage PostgresCompetitorStorage) GetAll(ctx context.Context) ([]models.Competitor, error) {
+func (s PostgresCompetitorStorage) GetAll(ctx context.Context) ([]models.Competitor, error) {
 	comps := make([]models.Competitor, 0)
 
-	rows, err := storage.con.Query(ctx, "SELECT * FROM competitor")
+	rows, err := s.con.Query(ctx, "SELECT * FROM competitor")
 	if err != nil {
 		log.Println("Failed to read from database")
 		return nil, err
@@ -56,19 +56,27 @@ func (storage PostgresCompetitorStorage) GetAll(ctx context.Context) ([]models.C
 	return comps, nil
 }
 
-func (storage PostgresCompetitorStorage) Create(ctx context.Context, competitor models.Competitor) error {
-	//TODO implement me
-	panic("implement me")
+func (s PostgresCompetitorStorage) Create(ctx context.Context, competitor models.Competitor) error {
+	command := "INSERT INTO competitor (id, name) VALUES ($1, $2)"
+	if _, err := s.con.Exec(ctx, command, competitor.ID(), competitor.Name()); err != nil {
+		log.Println(err)
+		return errors.New("failed to create new competitor")
+	}
+	return nil
 }
 
-func (storage PostgresCompetitorStorage) Update(ctx context.Context, competitor models.Competitor) error {
-	//TODO implement me
-	panic("implement me")
+func (s PostgresCompetitorStorage) Update(ctx context.Context, competitor models.Competitor) error {
+	command := "UPDATE competitor SET name = $2 WHERE id = $1"
+	if _, err := s.con.Exec(ctx, command, competitor.ID(), competitor.Name()); err != nil {
+		log.Println(err)
+		return errors.New("failed to update a competitor")
+	}
+	return nil
 }
 
-func (storage PostgresCompetitorStorage) Delete(ctx context.Context, id uuid.UUID) error {
-	//TODO implement me
-	panic("implement me")
+func (s PostgresCompetitorStorage) Delete(ctx context.Context, id uuid.UUID) error {
+	_, err := s.con.Exec(ctx, "DELETE FROM competitor WHERE id = $1", id)
+	return err
 }
 
 func NewPostgresCompetitorStorage(con *pgx.Conn) (storages.CompetitorStorage, error) {
