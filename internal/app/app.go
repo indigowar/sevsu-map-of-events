@@ -52,17 +52,25 @@ func Run(cfg *config.Config) {
 
 	r.Use(cors.Default())
 
-	r.GET("api/v1/competitor", json.GetAllCompetitorsHandler(competitorService))
-	r.POST("api/v1/competitor", json.CreateCompetitorHandler(competitorService))
+	v1 := r.Group("api/v1")
+	{
+		v1.GET("/competitor", json.GetAllCompetitorsHandler(competitorService))
+		v1.POST("/competitor", json.CreateCompetitorHandler(competitorService))
 
-	r.GET("/api/v1/founding_range/:id", json.GetByIDRangeHandler(foundingService))
-	r.GET("/api/v1/founding_range", json.GetMaximumRangeHandler(foundingService))
+		v1.GET("/founding_range/:id", json.GetByIDRangeHandler(foundingService))
+		v1.GET("/founding_range", json.GetMaximumRangeHandler(foundingService))
 
-	r.GET("/api/v1/co_founding_range/:id", json.GetByIDRangeHandler(coFoundingService))
-	r.GET("/api/v1/co_founding_range", json.GetMaximumRangeHandler(coFoundingService))
+		v1.GET("/co_founding_range/:id", json.GetByIDRangeHandler(coFoundingService))
+		v1.GET("/co_founding_range", json.GetMaximumRangeHandler(coFoundingService))
 
-	r.GET("api/v1/organizer_level", json.GetAllOrganizerLevelsHandler(organizerService))
-	r.POST("api/v1/organizer_level", json.CreateOrganizerLevelHandler(organizerService))
+		v1.GET("/organizer_level", json.GetAllOrganizerLevelsHandler(organizerService))
+		v1.POST("/organizer_level", json.CreateOrganizerLevelHandler(organizerService))
+
+		v1.GET("/organizer/", json.GetAllOrganizersHandler(organizerService))
+		v1.POST("/organizer/", json.CreateOrganizerHandler(organizerService))
+		v1.GET("/organizer/:id", json.GetByIDOrganizerHandler(organizerService))
+		v1.GET("/organizer/:id", json.UpdateOrganizerHandler(organizerService)) // TODO: implement
+	}
 
 	server := &http.Server{
 		Handler:        r,
