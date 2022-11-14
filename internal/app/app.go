@@ -38,8 +38,10 @@ func Run(cfg *config.Config) {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	organizerStorage, _ := storages.NewPostgresOrganizerStorage(conn)
 
 	competitorService := services.NewCompetitorService(competitorStorage)
+	organizerService, _ := services.NewOrganizerService(organizerStorage)
 
 	r := gin.Default()
 
@@ -47,6 +49,9 @@ func Run(cfg *config.Config) {
 
 	r.GET("api/v1/competitor", json.GetAllCompetitorsHandler(competitorService))
 	r.POST("api/v1/competitor", json.CreateCompetitorHandler(competitorService))
+
+	r.GET("api/v1/organizer_level", json.GetAllOrganizerLevelsHandler(organizerService))
+	r.POST("api/v1/organizer_level", json.CreateOrganizerLevelHandler(organizerService))
 
 	server := &http.Server{
 		Handler:        r,
