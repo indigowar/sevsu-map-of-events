@@ -21,7 +21,7 @@ func (s coFoundingRangePostgresStorage) GetByID(ctx context.Context, id uuid.UUI
 	var Id uuid.UUID
 	var low, high int
 
-	query := fmt.Sprintf("SELECT * FROM co_founding_range WHERE id = '%s'", id.String())
+	query := fmt.Sprintf("SELECT * FROM co_founding_range WHERE co_founding_range_id = '%s'", id.String())
 
 	if err := s.con.QueryRow(ctx, query).Scan(&Id, &low, &high); err != nil {
 		log.Println("Got query error or scan error: ", err)
@@ -33,15 +33,15 @@ func (s coFoundingRangePostgresStorage) GetByID(ctx context.Context, id uuid.UUI
 
 func (s coFoundingRangePostgresStorage) GetMaximumRange(ctx context.Context) (models.FoundingRange, error) {
 	var low, high int
-	if s.con.QueryRow(ctx, "SELECT MIN(low) FROM co_founding_range").Scan(&low) != nil ||
-		s.con.QueryRow(ctx, "SELECT MAX(high) FROM co_founding_range").Scan(&high) != nil {
+	if s.con.QueryRow(ctx, "SELECT MIN(co_founding_low) FROM co_founding_range").Scan(&low) != nil ||
+		s.con.QueryRow(ctx, "SELECT MAX(co_founding_high) FROM co_founding_range").Scan(&high) != nil {
 		return nil, errors.New("failed to read database")
 	}
 	return models.NewRange(uuid.UUID{}, low, high), nil
 }
 
 func (s coFoundingRangePostgresStorage) Create(ctx context.Context, foundingRange models.FoundingRange) (models.FoundingRange, error) {
-	command := "INSERT INTO founding_range (id, low, high) VALUES ($1, $2, $3)"
+	command := "INSERT INTO co_founding_range (co_founding_range_id, co_founding_low, co_founding_high) VALUES ($1, $2, $3)"
 	_, err := s.con.Exec(ctx, command, foundingRange.ID(), foundingRange.Low(), foundingRange.High())
 	if err != nil {
 		log.Println(err)
@@ -52,7 +52,7 @@ func (s coFoundingRangePostgresStorage) Create(ctx context.Context, foundingRang
 }
 
 func (s coFoundingRangePostgresStorage) Delete(ctx context.Context, id uuid.UUID) error {
-	if _, err := s.con.Exec(ctx, "DELETE FROM co_founding_range WHERE id = $1", id); err != nil {
+	if _, err := s.con.Exec(ctx, "DELETE FROM co_founding_range WHERE co_founding_id = $1", id); err != nil {
 		log.Println(err)
 		return errors.New("failed to delete from database")
 	}
