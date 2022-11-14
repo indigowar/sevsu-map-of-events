@@ -10,7 +10,7 @@ import (
 	"github.com/indigowar/map-of-events/internal/domain/services"
 )
 
-type organizerLevel struct {
+type orgLevelBinding struct {
 	Id       uuid.UUID `json:"id"`
 	Title    string    `json:"name"`
 	CodeWord string    `json:"code"`
@@ -26,9 +26,9 @@ func GetAllOrganizerLevelsHandler(svc services.OrganizerService) func(c *gin.Con
 			return
 		}
 
-		results := make([]organizerLevel, len(levels))
+		results := make([]orgLevelBinding, len(levels))
 		for i, v := range levels {
-			results[i] = organizerLevel{v.ID(), v.Name(), v.Code()}
+			results[i] = orgLevelBinding{v.ID(), v.Name(), v.Code()}
 		}
 
 		c.JSON(http.StatusOK, results)
@@ -55,10 +55,6 @@ func CreateOrganizerLevelHandler(svc services.OrganizerService) func(c *gin.Cont
 			c.Status(http.StatusInternalServerError)
 			return
 		}
-		c.JSON(http.StatusCreated, organizerLevel{o.ID(), o.Name(), o.Code()})
+		c.JSON(http.StatusCreated, orgLevelBinding{o.ID(), o.Name(), o.Code()})
 	}
 }
-
-func (l *organizerLevel) ID() uuid.UUID { return l.Id }
-func (l *organizerLevel) Name() string  { return l.Title }
-func (l *organizerLevel) Code() string  { return l.CodeWord }
