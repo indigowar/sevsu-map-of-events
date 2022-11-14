@@ -52,7 +52,7 @@ func (s coFoundingRangePostgresStorage) Create(ctx context.Context, foundingRang
 }
 
 func (s coFoundingRangePostgresStorage) Delete(ctx context.Context, id uuid.UUID) error {
-	if _, err := s.con.Exec(ctx, "DELETE FROM co_founding_range WHERE co_founding_id = $1", id); err != nil {
+	if _, err := s.con.Exec(ctx, "DELETE FROM co_founding_range WHERE co_founding_range_id = $1", id); err != nil {
 		log.Println(err)
 		return errors.New("failed to delete from database")
 	}
