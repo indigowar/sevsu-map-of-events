@@ -13,11 +13,12 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	"github.com/indigowar/map-of-events/internal/config"
+	"github.com/indigowar/map-of-events/internal/delivery/http/json"
+	"github.com/indigowar/map-of-events/internal/infra/adapters/storages"
+	"github.com/indigowar/map-of-events/internal/services"
 )
 
 func Run(cfg *config.Config) {
-	r := gin.New()
-
 	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
 		cfg.Postgres.User,
 		cfg.Postgres.Password,
@@ -31,6 +32,18 @@ func Run(cfg *config.Config) {
 		log.Fatalln(err)
 	}
 	defer conn.Close(context.Background())
+
+	competitorStorage, err := storages.NewPostgresCompetitorStorage(conn)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	competitorService := services.NewCompetitorService(competitorStorage)
+
+	r := gin.Default()
+
+	r.GET("api/v1/competitor", json.GetAllCompetitorsHandler(competitorService))
+	r.POST("api/v1/competitor", json.CreateCompetitorHandler(competitorService))
 
 	server := &http.Server{
 		Handler:        r,
