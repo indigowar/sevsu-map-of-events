@@ -24,10 +24,11 @@ func (o organizerSvc) GetByID(ctx context.Context, id uuid.UUID) (models.Organiz
 
 func (o organizerSvc) Create(ctx context.Context, name, logo string, level uuid.UUID) (models.Organizer, error) {
 	// TODO: add validation of user input
-	organizer := models.NewOrganizer(uuid.New(), name, logo, level)
+	organizer :=
+		models.Organizer{ID: uuid.New(), Name: name, Logo: logo, Level: level}
 	err := o.storage.Create(ctx, organizer)
 	if err != nil {
-		return nil, err
+		return models.Organizer{}, err
 	}
 	return organizer, nil
 }

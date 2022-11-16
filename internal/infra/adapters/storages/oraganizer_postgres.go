@@ -33,10 +33,10 @@ func (s PostgresOrganizerStorage) GetByID(ctx context.Context, id uuid.UUID) (mo
 	err := s.conn.QueryRow(ctx, fmt.Sprintf("SELECT * FROM organizer WHERE organizer_id = '%s'", id.String())).Scan(&Id, &name, &logo, &level)
 	if err != nil {
 		log.Println("Failed to read to database")
-		return nil, err
+		return models.Organizer{}, err
 	}
 
-	return models.NewOrganizer(Id, name, logo, level), nil
+	return models.Organizer{ID: Id, Name: name, Logo: logo, Level: level}, nil
 }
 
 func (s PostgresOrganizerStorage) GetAll(ctx context.Context) ([]models.Organizer, error) {
@@ -59,7 +59,7 @@ func (s PostgresOrganizerStorage) GetAll(ctx context.Context) ([]models.Organize
 		logo := values[2].(string)
 		level := values[3].(uuid.UUID)
 
-		organizers = append(organizers, models.NewOrganizer(id, name, logo, level))
+		organizers = append(organizers, models.Organizer{ID: id, Name: name, Logo: logo, Level: level})
 	}
 
 	return organizers, nil
@@ -68,7 +68,7 @@ func (s PostgresOrganizerStorage) GetAll(ctx context.Context) ([]models.Organize
 func (s PostgresOrganizerStorage) Create(ctx context.Context, organizer models.Organizer) error {
 	command := "INSERT INTO organizer (organizer_id, organizer_name, organizer_image, organizer_level) VALUES ($1, $2, $3, $4)"
 
-	if _, err := s.conn.Exec(ctx, command, organizer.ID(), organizer.Name(), organizer.Logo(), organizer.Level()); err != nil {
+	if _, err := s.conn.Exec(ctx, command, organizer.ID, organizer.Name, organizer.Logo, organizer.Level); err != nil {
 		log.Println(err)
 		return errors.New("failed to create organizer")
 	}
@@ -83,7 +83,7 @@ func (s PostgresOrganizerStorage) Delete(ctx context.Context, id uuid.UUID) erro
 func (s PostgresOrganizerStorage) Update(ctx context.Context, organizer models.Organizer) error {
 	command := "UPDATE organizer SET organizer_name = $2, organizer_image = $3, organizer_level = $4 WHERE organizer_id = $1"
 
-	if _, err := s.conn.Exec(ctx, command, organizer.ID(), organizer.Name(), organizer.Logo(), organizer.Level()); err != nil {
+	if _, err := s.conn.Exec(ctx, command, organizer.ID, organizer.Name, organizer.Logo, organizer.Level); err != nil {
 		log.Println(err)
 		return errors.New("failed to update")
 	}
