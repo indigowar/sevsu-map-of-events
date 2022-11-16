@@ -114,7 +114,15 @@ func (s postgresEventStorage) Create(ctx context.Context, event models.Event) er
 		 $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
 		)`
 
-	_, err := s.con.Exec(ctx, command,
+	transaction, err := s.con.Begin(ctx)
+
+	if err != nil {
+		log.Println(err)
+		return errors.New("failed to start a transaction")
+	}
+	defer transaction.Rollback(ctx)
+
+	_, err = transaction.Exec(ctx, command,
 		event.ID(), event.Title(), event.Organizer(), event.FoundingType(), event.FoundingRange(),
 		event.CoFoundingRange(), event.SubmissionDeadline(), event.ConsiderationPeriod(), event.RealisationPeriod(),
 		event.Result(), event.Site(), event.Document(), event.InternalContacts(), event.TRL())
