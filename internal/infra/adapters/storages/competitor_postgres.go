@@ -25,10 +25,10 @@ func (s PostgresCompetitorStorage) Get(ctx context.Context, id uuid.UUID) (model
 
 	if err := s.con.QueryRow(ctx, query).Scan(&Id, &name); err != nil {
 		log.Println("Got query error or scan error: ", err)
-		return nil, err
+		return models.Competitor{}, err
 	}
 
-	return models.NewCompetitor(Id, name), nil
+	return models.Competitor{ID: id, Name: name}, nil
 }
 
 func (s PostgresCompetitorStorage) GetAll(ctx context.Context) ([]models.Competitor, error) {
@@ -52,7 +52,7 @@ func (s PostgresCompetitorStorage) GetAll(ctx context.Context) ([]models.Competi
 
 		parsedId, _ := uuid.FromBytes(id[:])
 
-		comps = append(comps, models.NewCompetitor(parsedId, name))
+		comps = append(comps, models.Competitor{ID: parsedId, Name: name})
 	}
 
 	return comps, nil
@@ -60,7 +60,7 @@ func (s PostgresCompetitorStorage) GetAll(ctx context.Context) ([]models.Competi
 
 func (s PostgresCompetitorStorage) Create(ctx context.Context, competitor models.Competitor) error {
 	command := "INSERT INTO competitor (competitor_id, competitor_name) VALUES ($1, $2)"
-	if _, err := s.con.Exec(ctx, command, competitor.ID(), competitor.Name()); err != nil {
+	if _, err := s.con.Exec(ctx, command, competitor.ID, competitor.Name); err != nil {
 		log.Println(err)
 		return errors.New("failed to create new competitor")
 	}
@@ -69,7 +69,7 @@ func (s PostgresCompetitorStorage) Create(ctx context.Context, competitor models
 
 func (s PostgresCompetitorStorage) Update(ctx context.Context, competitor models.Competitor) error {
 	command := "UPDATE competitor SET competitor_name = $2 WHERE competitor_id = $1"
-	if _, err := s.con.Exec(ctx, command, competitor.ID(), competitor.Name()); err != nil {
+	if _, err := s.con.Exec(ctx, command, competitor.ID, competitor.Name); err != nil {
 		log.Println(err)
 		return errors.New("failed to update a competitor")
 	}

@@ -26,7 +26,7 @@ func GetAllCompetitorsHandler(svc services.CompetitorService) func(c *gin.Contex
 
 		result := make([]Competitor, len(comps))
 		for i, v := range comps {
-			result[i] = Competitor{v.ID(), v.Name()}
+			result[i] = Competitor{v.ID, v.Name}
 		}
 
 		c.JSON(http.StatusOK, result)
@@ -48,7 +48,7 @@ func CreateCompetitorHandler(srv services.CompetitorService) func(c *gin.Context
 			return
 		}
 
-		c.JSON(http.StatusAccepted, Competitor{obj.ID(), obj.Name()})
+		c.JSON(http.StatusAccepted, Competitor{obj.ID, obj.Name})
 	}
 }
 

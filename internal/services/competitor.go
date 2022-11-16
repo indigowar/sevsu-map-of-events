@@ -20,7 +20,7 @@ func (svc competitorService) GetByID(ctx context.Context, id uuid.UUID) (models.
 	c, err := svc.storage.Get(ctx, id)
 	if err != nil {
 		log.Println(err)
-		return nil, errors.New("not found")
+		return models.Competitor{}, errors.New("not found")
 	}
 	return c, nil
 }
@@ -35,11 +35,14 @@ func (svc competitorService) GetAll(ctx context.Context) ([]models.Competitor, e
 }
 
 func (svc competitorService) Create(ctx context.Context, name string) (models.Competitor, error) {
-	c := models.NewCompetitor(uuid.New(), name)
+	c := models.Competitor{
+		ID:   uuid.New(),
+		Name: name,
+	}
 
 	if err := svc.storage.Create(ctx, c); err != nil {
 		log.Println(err)
-		return nil, errors.New("failed to create a competitor")
+		return models.Competitor{}, errors.New("failed to create a competitor")
 	}
 
 	return c, nil
