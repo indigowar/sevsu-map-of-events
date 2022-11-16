@@ -9,8 +9,8 @@ import (
 )
 
 type RangeStorageRepository interface {
-	GetByID(ctx context.Context, id uuid.UUID) (models.FoundingRange, error)
-	GetMaximumRange(ctx context.Context) (models.FoundingRange, error)
-	Create(ctx context.Context, foundingRange models.FoundingRange) (models.FoundingRange, error)
+	GetByID(ctx context.Context, id uuid.UUID) (models.RangeModel, error)
+	GetMaximumRange(ctx context.Context) (models.RangeModel, error)
+	Create(ctx context.Context, foundingRange models.RangeModel) (models.RangeModel, error)
 	Delete(ctx context.Context, id uuid.UUID) error
 }

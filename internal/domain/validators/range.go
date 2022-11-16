@@ -12,9 +12,9 @@ var (
 	ErrRangeHasUnacceptablePercent = errors.New("range has a value of unaccepted percent")
 )
 
-func ValidateRange(r models.FoundingRange) error {
-	high := r.High()
-	low := r.Low()
+func ValidateRange(r models.RangeModel) error {
+	high := r.High
+	low := r.Low
 
 	if high > low {
 		return ErrLowBiggerThenHighValue
@@ -27,9 +27,9 @@ func ValidateRange(r models.FoundingRange) error {
 	return nil
 }
 
-func ValidatePercentRange(r models.FoundingRange) error {
-	high := r.High()
-	low := r.Low()
+func ValidatePercentRange(r models.RangeModel) error {
+	high := r.High
+	low := r.Low
 
 	if err := ValidateRange(r); err != nil {
 		return err

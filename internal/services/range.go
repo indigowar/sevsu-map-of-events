@@ -15,10 +15,10 @@ import (
 
 type rangeService struct {
 	storage        storages.RangeStorageRepository
-	validatorsList []func(foundingRange models.FoundingRange) error
+	validatorsList []func(foundingRange models.Range) error
 }
 
-func (svc rangeService) GetByID(ctx context.Context, id uuid.UUID) (models.FoundingRange, error) {
+func (svc rangeService) GetByID(ctx context.Context, id uuid.UUID) (models.Range, error) {
 	r, err := svc.storage.GetByID(ctx, id)
 	if err != nil {
 		log.Println(err)
@@ -28,7 +28,7 @@ func (svc rangeService) GetByID(ctx context.Context, id uuid.UUID) (models.Found
 	return r, nil
 }
 
-func (svc rangeService) GetMaximumRange(ctx context.Context) (models.FoundingRange, error) {
+func (svc rangeService) GetMaximumRange(ctx context.Context) (models.Range, error) {
 	result, err := svc.storage.GetMaximumRange(ctx)
 	if err != nil {
 		log.Println(err)
@@ -37,7 +37,7 @@ func (svc rangeService) GetMaximumRange(ctx context.Context) (models.FoundingRan
 	return result, nil
 }
 
-func (svc rangeService) Create(ctx context.Context, low, high int) (models.FoundingRange, error) {
+func (svc rangeService) Create(ctx context.Context, low, high int) (models.Range, error) {
 	r := models.NewRange(uuid.New(), low, high)
 
 	for _, validator := range svc.validatorsList {
@@ -53,7 +53,7 @@ func (svc rangeService) Delete(ctx context.Context, id uuid.UUID) error {
 	return svc.Delete(ctx, id)
 }
 
-func (svc rangeService) Update(ctx context.Context, foundingRange models.FoundingRange) (models.FoundingRange, error) {
+func (svc rangeService) Update(ctx context.Context, foundingRange models.Range) (models.Range, error) {
 	for _, validator := range svc.validatorsList {
 		if err := validator(foundingRange); err != nil {
 			return nil, err
@@ -70,14 +70,14 @@ func (svc rangeService) Update(ctx context.Context, foundingRange models.Foundin
 func NewFoundingRangeService(storage storages.RangeStorageRepository) services.RangeService {
 	return &rangeService{
 		storage:        storage,
-		validatorsList: []func(foundingRange models.FoundingRange) error{validators.ValidateRange},
+		validatorsList: []func(foundingRange models.Range) error{validators.ValidateRange},
 	}
 }
 
 func NewCoFoundingRangeService(storage storages.RangeStorageRepository) services.RangeService {
 	return &rangeService{
 		storage: storage,
-		validatorsList: []func(foundingRange models.FoundingRange) error{
+		validatorsList: []func(foundingRange models.Range) error{
 			validators.ValidateRange,
 			validators.ValidatePercentRange,
 		},
