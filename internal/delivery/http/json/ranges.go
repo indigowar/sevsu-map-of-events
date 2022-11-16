@@ -34,7 +34,7 @@ func GetByIDRangeHandler(srv services.RangeService) func(c *gin.Context) {
 			c.Status(http.StatusNotFound)
 		}
 
-		c.JSON(http.StatusOK, rangeType{r.ID(), r.Low(), r.High()})
+		c.JSON(http.StatusOK, rangeType{r.ID, r.Low, r.High})
 	}
 }
 
@@ -46,6 +46,6 @@ func GetMaximumRangeHandler(srv services.RangeService) func(c *gin.Context) {
 			c.Status(http.StatusInternalServerError)
 			return
 		}
-		c.JSON(http.StatusOK, rangeType{result.ID(), result.Low(), result.High()})
+		c.JSON(http.StatusOK, rangeType{result.ID, result.Low, result.High})
 	}
 }

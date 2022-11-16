@@ -28,7 +28,7 @@ func GetAllOrganizerLevelsHandler(svc services.OrganizerService) func(c *gin.Con
 
 		results := make([]orgLevelBinding, len(levels))
 		for i, v := range levels {
-			results[i] = orgLevelBinding{v.ID(), v.Name(), v.Code()}
+			results[i] = orgLevelBinding{v.ID, v.Name, v.Code}
 		}
 
 		c.JSON(http.StatusOK, results)
@@ -55,7 +55,7 @@ func CreateOrganizerLevelHandler(svc services.OrganizerService) func(c *gin.Cont
 			c.Status(http.StatusInternalServerError)
 			return
 		}
-		c.JSON(http.StatusCreated, orgLevelBinding{o.ID(), o.Name(), o.Code()})
+		c.JSON(http.StatusCreated, orgLevelBinding{o.ID, o.Name, o.Code})
 	}
 }
 
@@ -76,7 +76,7 @@ func GetAllOrganizersHandler(svc services.OrganizerService) func(c *gin.Context)
 		}
 		result := make([]organizerBinding, len(objects))
 		for i, v := range objects {
-			result[i] = organizerBinding{v.ID(), v.Name(), v.Logo(), v.Level()}
+			result[i] = organizerBinding{v.ID, v.Name, v.Logo, v.Level}
 		}
 
 		c.JSON(http.StatusOK, result)
@@ -101,10 +101,11 @@ func GetByIDOrganizerHandler(svc services.OrganizerService) func(c *gin.Context)
 			return
 		}
 		c.JSON(http.StatusOK, organizerBinding{
-			organizer.ID(),
-			organizer.Name(),
-			organizer.Logo(),
-			organizer.Level()})
+			organizer.ID,
+			organizer.Name,
+			organizer.Logo,
+			organizer.Level,
+		})
 	}
 }
 
@@ -130,10 +131,10 @@ func CreateOrganizerHandler(svc services.OrganizerService) func(c *gin.Context) 
 		}
 
 		c.JSON(http.StatusCreated, organizerBinding{
-			created.ID(),
-			created.Name(),
-			created.Logo(),
-			created.Level(),
+			created.ID,
+			created.Name,
+			created.Logo,
+			created.Level,
 		})
 	}
 }
