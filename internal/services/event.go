@@ -2,6 +2,8 @@ package services
 
 import (
 	"context"
+	"errors"
+	"log"
 
 	"github.com/google/uuid"
 
@@ -16,40 +18,141 @@ type eventService struct {
 	coFoundingRanges services.RangeService
 	competitors      services.CompetitorService
 
-	eventStorage storages.EventStorageRepository
+	eventStorage   storages.EventStorageRepository
+	subjectStorage storages.SubjectStorageRepository
 }
 
 func (svc eventService) GetAll(ctx context.Context) ([]models.Event, error) {
-	//TODO implement me
-	panic("implement me")
+	ids, err := svc.eventStorage.GetIDList(ctx)
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("internal error")
+	}
+	events := make([]models.Event, len(ids))
+	for i := range ids {
+		events[i], err = svc.GetByID(ctx, ids[i])
+		if err != nil {
+			log.Println(err)
+		}
+	}
+	return events, nil
 }
 
 func (svc eventService) GetByID(ctx context.Context, id uuid.UUID) (models.Event, error) {
-	//TODO implement me
-	panic("implement me")
+	event, err := svc.eventStorage.GetByID(ctx, id)
+	if err != nil {
+		log.Println(err)
+		return models.Event{}, errors.New("not found")
+	}
+	return event, nil
 }
 
-func (svc eventService) Create(ctx context.Context, event models.Event) (models.Event, error) {
-	//TODO implement me
-	panic("implement me")
+func (svc eventService) Create(ctx context.Context, info services.EventCreateUpdateInfo) (models.Event, error) {
+	eventId := uuid.New()
+
+	var undoError error = nil
+
+	if _, err := svc.organizer.GetByID(ctx, info.Organizer); err != nil {
+		return models.Event{}, nil
+	}
+
+	founding, err := svc.foundingRanges.Create(ctx, info.FoundingRangeLow, info.FoundingRangeHigh)
+	if err != nil {
+		return models.Event{}, errors.New("internal error")
+	}
+	defer func() {
+		if undoError != nil {
+			_ = svc.foundingRanges.Delete(context.TODO(), founding.ID)
+		}
+	}()
+
+	coFounding, err := svc.coFoundingRanges.Create(ctx, info.CoFoundingRangeLow, info.CoFoundingRangeHigh)
+	if err != nil {
+		undoError = errors.New("range_svc to event_svc: " + err.Error())
+		return models.Event{}, errors.New("internal error")
+	}
+
+	subjects := make([]uuid.UUID, 0)
+
+	event := models.Event{
+		ID:                  eventId,
+		Title:               info.Title,
+		Organizer:           info.Organizer,
+		FoundingType:        info.FoundingType,
+		FoundingRange:       founding.ID,
+		CoFoundingRange:     coFounding.ID,
+		SubmissionDeadline:  info.SubmissionDeadline,
+		ConsiderationPeriod: info.ConsiderationPeriod,
+		RealisationPeriod:   info.RealisationPeriod,
+		Result:              info.Result,
+		Site:                info.Site,
+		Document:            info.Document,
+		InternalContacts:    info.InternalContacts,
+		TRL:                 info.TRL,
+		Competitors:         subjects,
+		Subjects:            info.Competitors,
+	}
+
+	if err := svc.eventStorage.Create(ctx, event); err != nil {
+		log.Println(err)
+		undoError = errors.New("failed to create event")
+		return models.Event{}, errors.New("internal error")
+	}
+	defer func() {
+		if undoError != nil {
+			_ = svc.Delete(context.TODO(), eventId)
+		}
+	}()
+
+	for _, v := range info.Subjects {
+		id := uuid.New()
+		_ = svc.subjectStorage.Add(ctx, models.Subject{
+			ID:   id,
+			Name: v,
+		})
+		subjects = append(subjects, id)
+	}
+
+	event.Subjects = subjects
+
+	return event, nil
 }
 
 func (svc eventService) Delete(ctx context.Context, id uuid.UUID) error {
-	//TODO implement me
-	panic("implement me")
+	return svc.Delete(ctx, id)
 }
 
-func (svc eventService) GetAllAsMinimal(ctx context.Context, id uuid.UUID) ([]services.EventMinimal, error) {
-	//TODO implement me
-	panic("implement me")
+func (svc eventService) GetAllAsMinimal(ctx context.Context) ([]services.EventMinimal, error) {
+	events, err := svc.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]services.EventMinimal, len(events))
+	for i, v := range events {
+		result[i] = services.EventMinimal{
+			ID:                 v.ID,
+			Title:              v.Title,
+			Organizer:          v.Organizer,
+			SubmissionDeadline: v.SubmissionDeadline,
+		}
+	}
+	return result, nil
 }
 
 func (svc eventService) GetByIDAsMinimal(ctx context.Context, id uuid.UUID) (services.EventMinimal, error) {
-	//TODO implement me
-	panic("implement me")
+	event, err := svc.GetByID(ctx, id)
+	if err != nil {
+		return services.EventMinimal{}, err
+	}
+	return services.EventMinimal{
+		ID:                 event.ID,
+		Title:              event.Title,
+		Organizer:          event.Organizer,
+		SubmissionDeadline: event.SubmissionDeadline,
+	}, nil
 }
 
-func NewEventServices(storage storages.EventStorageRepository,
+func NewEventServices(storage storages.EventStorageRepository, subjects storages.SubjectStorageRepository,
 	organizer services.OrganizerService,
 	foundingRange, coFoundingRange services.RangeService,
 	competitors services.CompetitorService) services.EventService {
@@ -59,5 +162,6 @@ func NewEventServices(storage storages.EventStorageRepository,
 		coFoundingRanges: coFoundingRange,
 		competitors:      competitors,
 		eventStorage:     storage,
+		subjectStorage:   subjects,
 	}
 }

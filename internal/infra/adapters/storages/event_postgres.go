@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -31,12 +30,12 @@ func (s postgresEventStorage) GetIDList(ctx context.Context) ([]uuid.UUID, error
 	}
 
 	for rows.Next() {
-		vals, err := rows.Values()
+		values, err := rows.Values()
 		if err != nil {
 			log.Println(err)
 			return nil, errors.New("failed to read fetched data from database")
 		}
-		stringId := vals[0].([16]byte)
+		stringId := values[0].([16]byte)
 
 		id, err := uuid.FromBytes(stringId[:])
 		if err != nil {
@@ -49,7 +48,7 @@ func (s postgresEventStorage) GetIDList(ctx context.Context) ([]uuid.UUID, error
 	return results, nil
 }
 
-func (s postgresEventStorage) Filter(ctx context.Context) ([]uuid.UUID, error) {
+func (s postgresEventStorage) Filter(_ context.Context) ([]uuid.UUID, error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -57,50 +56,30 @@ func (s postgresEventStorage) Filter(ctx context.Context) ([]uuid.UUID, error) {
 func (s postgresEventStorage) GetByID(ctx context.Context, id uuid.UUID) (models.Event, error) {
 	query := fmt.Sprintf("SELECT * FROM event WHERE event_id = '%s'", id.String())
 
-	var Id, organizer, foundingRange, coFoundingRange uuid.UUID
-	var title, foundingType, considerationPeriod, realisationPeriod, result, site, document, internalContacts string
-	var submissionPeriod time.Time
-	var trl int
+	var event models.Event
 
 	err := s.con.QueryRow(ctx, query).Scan(
-		&Id, &title, &organizer, &foundingType, &foundingRange, &coFoundingRange, &submissionPeriod,
-		&considerationPeriod, &realisationPeriod, &result, &site, &document, &internalContacts,
-		&trl,
+		&event.ID, &event.Title, &event.Organizer, &event.FoundingType, &event.FoundingRange, &event.CoFoundingRange, &event.SubmissionDeadline,
+		&event.ConsiderationPeriod, &event.RealisationPeriod, &event.Result, &event.Site, &event.Document, &event.InternalContacts,
+		&event.TRL,
 	)
 
 	if err != nil {
 		log.Println(err)
-		return nil, errors.New("failed to read data from database")
+		return models.Event{}, errors.New("failed to read data from database")
 	}
 
-	subjects, err := s.subjects.GetByEvent(ctx, id)
+	event.Subjects, err = s.subjects.GetByEvent(ctx, id)
 	if err != nil {
-		return nil, err
+		return models.Event{}, err
 	}
 
-	competitors, err := s.GetCompetitors(ctx, id)
+	event.Competitors, err = s.GetCompetitors(ctx, id)
 	if err != nil {
-		return nil, err
+		return models.Event{}, err
 	}
 
-	return models.NewEvent(
-		Id,
-		title,
-		organizer,
-		foundingType,
-		foundingRange,
-		coFoundingRange,
-		submissionPeriod,
-		considerationPeriod,
-		realisationPeriod,
-		result,
-		site,
-		document,
-		internalContacts,
-		trl,
-		competitors,
-		subjects,
-	), nil
+	return event, nil
 }
 
 func (s postgresEventStorage) Create(ctx context.Context, event models.Event) error {
@@ -120,12 +99,14 @@ func (s postgresEventStorage) Create(ctx context.Context, event models.Event) er
 		log.Println(err)
 		return errors.New("failed to start a transaction")
 	}
-	defer transaction.Rollback(ctx)
+	defer func(transaction pgx.Tx, ctx context.Context) {
+		_ = transaction.Rollback(ctx)
+	}(transaction, ctx)
 
 	_, err = transaction.Exec(ctx, command,
-		event.ID(), event.Title(), event.Organizer(), event.FoundingType(), event.FoundingRange(),
-		event.CoFoundingRange(), event.SubmissionDeadline(), event.ConsiderationPeriod(), event.RealisationPeriod(),
-		event.Result(), event.Site(), event.Document(), event.InternalContacts(), event.TRL())
+		event.ID, event.Title, event.Organizer, event.FoundingType, event.FoundingRange,
+		event.CoFoundingRange, event.SubmissionDeadline, event.ConsiderationPeriod, event.RealisationPeriod,
+		event.Result, event.Site, event.Document, event.InternalContacts, event.TRL)
 
 	if err != nil {
 		log.Println(err)
@@ -140,7 +121,9 @@ func (s postgresEventStorage) Delete(ctx context.Context, id uuid.UUID) error {
 		log.Println(err)
 		return errors.New("transaction failure")
 	}
-	defer tx.Rollback(ctx)
+	defer func(tx pgx.Tx, ctx context.Context) {
+		_ = tx.Rollback(ctx)
+	}(tx, ctx)
 
 	if _, err := tx.Exec(ctx, "DELETE FROM event WHERE event_id = $1", id); err != nil {
 		log.Println(err)
@@ -161,7 +144,9 @@ func (s postgresEventStorage) Update(ctx context.Context, event models.Event) er
 		log.Println(err)
 		return errors.New("failed to start a transaction")
 	}
-	defer tx.Rollback(ctx)
+	defer func(tx pgx.Tx, ctx context.Context) {
+		_ = tx.Rollback(ctx)
+	}(tx, ctx)
 
 	command := ` UPDATE event SET 
                   title = $1,
@@ -180,9 +165,9 @@ func (s postgresEventStorage) Update(ctx context.Context, event models.Event) er
                   WHERE event_id = $1`
 
 	_, err = tx.Exec(ctx, command,
-		event.ID(), event.Title(), event.Organizer(), event.FoundingType(), event.FoundingRange(),
-		event.CoFoundingRange(), event.SubmissionDeadline(), event.ConsiderationPeriod(), event.RealisationPeriod(),
-		event.Result(), event.Site(), event.Document(), event.InternalContacts(), event.TRL())
+		event.ID, event.Title, event.Organizer, event.FoundingType, event.FoundingRange,
+		event.CoFoundingRange, event.SubmissionDeadline, event.ConsiderationPeriod, event.RealisationPeriod,
+		event.Result, event.Site, event.Document, event.InternalContacts, event.TRL)
 
 	if err != nil {
 		log.Println(err)
