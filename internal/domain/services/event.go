@@ -14,6 +14,7 @@ type EventMinimal struct {
 	Title              string
 	Organizer          uuid.UUID
 	SubmissionDeadline time.Time
+	TRL                int
 }
 
 type EventCreateUpdateInfo struct {

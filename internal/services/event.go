@@ -134,6 +134,7 @@ func (svc eventService) GetAllAsMinimal(ctx context.Context) ([]services.EventMi
 			Title:              v.Title,
 			Organizer:          v.Organizer,
 			SubmissionDeadline: v.SubmissionDeadline,
+			TRL:                v.TRL,
 		}
 	}
 	return result, nil
@@ -149,6 +150,7 @@ func (svc eventService) GetByIDAsMinimal(ctx context.Context, id uuid.UUID) (ser
 		Title:              event.Title,
 		Organizer:          event.Organizer,
 		SubmissionDeadline: event.SubmissionDeadline,
+		TRL:                event.TRL,
 	}, nil
 }
 
