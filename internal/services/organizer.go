@@ -43,15 +43,15 @@ func (o organizerSvc) GetAllLevels(ctx context.Context) ([]models.OrganizerLevel
 
 func (o organizerSvc) CreateLevel(ctx context.Context, name string, code string) (models.OrganizerLevel, error) {
 	// TODO: add validation
-	level := models.NewOrganizerLevel(uuid.New(), name, code)
+	level := models.OrganizerLevel{ID: uuid.New(), Name: name, Code: code}
 
 	if err := o.storage.AddLevel(ctx, level); err != nil {
-		return nil, err
+		return models.OrganizerLevel{}, err
 	}
 	return level, nil
 }
 
-func (o organizerSvc) UpdateLevel(ctx context.Context, level models.OrganizerLevel) (models.OrganizerLevel, error) {
+func (o organizerSvc) UpdateLevel(_ context.Context, _ models.OrganizerLevel) (models.OrganizerLevel, error) {
 	panic("unimplemented")
 }
 

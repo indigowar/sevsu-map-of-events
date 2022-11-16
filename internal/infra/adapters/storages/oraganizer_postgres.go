@@ -113,7 +113,7 @@ func (s PostgresOrganizerStorage) GetLevels(ctx context.Context) ([]models.Organ
 		id := values[0].(uuid.UUID)
 		name := values[1].(string)
 		code := values[2].(string)
-		levels = append(levels, models.NewOrganizerLevel(id, name, code))
+		levels = append(levels, models.OrganizerLevel{ID: id, Name: name, Code: code})
 	}
 
 	return levels, nil
@@ -122,7 +122,7 @@ func (s PostgresOrganizerStorage) GetLevels(ctx context.Context) ([]models.Organ
 func (s PostgresOrganizerStorage) AddLevel(ctx context.Context, level models.OrganizerLevel) error {
 	command := "INSERT INTO organizer_level(organizer_level_id, organizer_level_name, organizer_level_code) VALUES ($1, $2, $3)"
 
-	if _, err := s.conn.Exec(ctx, command, level.ID(), level.Name(), level.Code()); err != nil {
+	if _, err := s.conn.Exec(ctx, command, level.ID, level.Name, level.Code); err != nil {
 		log.Println(err)
 		return errors.New("failed to add to database")
 	}
