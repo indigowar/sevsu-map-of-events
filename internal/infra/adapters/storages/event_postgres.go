@@ -135,15 +135,34 @@ func (s postgresEventStorage) Create(ctx context.Context, event models.Event) er
 }
 
 func (s postgresEventStorage) Delete(ctx context.Context, id uuid.UUID) error {
-	command := "DELETE FROM event WHERE event_id = $1"
-	if _, err := s.con.Exec(ctx, command, id); err != nil {
+	tx, err := s.con.Begin(ctx)
+	if err != nil {
 		log.Println(err)
-		return errors.New("failed to delete value")
+		return errors.New("transaction failure")
 	}
+	defer tx.Rollback(ctx)
+
+	if _, err := tx.Exec(ctx, "DELETE FROM event WHERE event_id = $1", id); err != nil {
+		log.Println(err)
+		return errors.New("failed to delete from db")
+	}
+
+	if _, err := tx.Exec(ctx, "DELETE FROM competitor_requirements WHERE cr_event = $1", id); err != nil {
+		log.Println(err)
+		return errors.New("failed to delete from db")
+	}
+
 	return nil
 }
 
 func (s postgresEventStorage) Update(ctx context.Context, event models.Event) error {
+	tx, err := s.con.Begin(ctx)
+	if err != nil {
+		log.Println(err)
+		return errors.New("failed to start a transaction")
+	}
+	defer tx.Rollback(ctx)
+
 	command := ` UPDATE event SET 
                   title = $1,
                   event_organizer = $2,
@@ -160,7 +179,7 @@ func (s postgresEventStorage) Update(ctx context.Context, event models.Event) er
                   event_trl = $13
                   WHERE event_id = $1`
 
-	_, err := s.con.Exec(ctx, command,
+	_, err = tx.Exec(ctx, command,
 		event.ID(), event.Title(), event.Organizer(), event.FoundingType(), event.FoundingRange(),
 		event.CoFoundingRange(), event.SubmissionDeadline(), event.ConsiderationPeriod(), event.RealisationPeriod(),
 		event.Result(), event.Site(), event.Document(), event.InternalContacts(), event.TRL())
