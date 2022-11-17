@@ -49,7 +49,6 @@ type Event struct {
 	InternalContacts    string
 	TRL                 int
 	Competitors         []uuid.UUID
-	Subjects            []uuid.UUID
 }
 
 func (e Event) Error() string {

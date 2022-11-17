@@ -69,11 +69,6 @@ func (s postgresEventStorage) GetByID(ctx context.Context, id uuid.UUID) (models
 		return models.Event{}, errors.New("failed to read data from database")
 	}
 
-	event.Subjects, err = s.subjects.GetByEvent(ctx, id)
-	if err != nil {
-		return models.Event{}, err
-	}
-
 	event.Competitors, err = s.GetCompetitors(ctx, id)
 	if err != nil {
 		return models.Event{}, err
@@ -139,6 +134,7 @@ func (s postgresEventStorage) Delete(ctx context.Context, id uuid.UUID) error {
 }
 
 func (s postgresEventStorage) Update(ctx context.Context, event models.Event) error {
+	// TODO: Add updating of competitor requirements
 	tx, err := s.con.Begin(ctx)
 	if err != nil {
 		log.Println(err)

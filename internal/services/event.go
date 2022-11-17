@@ -90,7 +90,6 @@ func (svc eventService) Create(ctx context.Context, info services.EventCreateUpd
 		InternalContacts:    info.InternalContacts,
 		TRL:                 info.TRL,
 		Competitors:         subjects,
-		Subjects:            info.Competitors,
 	}
 
 	if err := svc.eventStorage.Create(ctx, event); err != nil {
@@ -112,8 +111,6 @@ func (svc eventService) Create(ctx context.Context, info services.EventCreateUpd
 		})
 		subjects = append(subjects, id)
 	}
-
-	event.Subjects = subjects
 
 	return event, nil
 }
