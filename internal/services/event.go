@@ -47,7 +47,7 @@ func (svc eventService) GetByID(ctx context.Context, id uuid.UUID) (models.Event
 	return event, nil
 }
 
-func (svc eventService) Create(ctx context.Context, info services.EventCreateUpdateInfo) (models.Event, error) {
+func (svc eventService) Create(ctx context.Context, info services.EventCreateInfo) (models.Event, error) {
 	eventId := uuid.New()
 
 	var undoError error = nil
@@ -151,7 +151,7 @@ func (svc eventService) GetByIDAsMinimal(ctx context.Context, id uuid.UUID) (ser
 	}, nil
 }
 
-func (svc eventService) Update(_ context.Context, _ uuid.UUID, _ services.EventCreateUpdateInfo) (models.Event, error) {
+func (svc eventService) Update(_ context.Context, _ uuid.UUID, _ services.EventCreateInfo) (models.Event, error) {
 	panic("not implemented")
 }
 

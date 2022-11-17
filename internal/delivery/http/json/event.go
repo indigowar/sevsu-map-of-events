@@ -191,7 +191,6 @@ func fromModel(e models.Event) eventBinding {
 		InternalContacts:    e.InternalContacts,
 		TRL:                 e.TRL,
 		Competitors:         e.Competitors,
-		Subjects:            e.Subjects,
 	}
 }
 
@@ -215,8 +214,8 @@ type createUpdateInfoBinding struct {
 	Subjects            []string    `json:"subjects"`
 }
 
-func toUpdateCreateInfo(i createUpdateInfoBinding) services.EventCreateUpdateInfo {
-	return services.EventCreateUpdateInfo{
+func toUpdateCreateInfo(i createUpdateInfoBinding) services.EventCreateInfo {
+	return services.EventCreateInfo{
 		Title:               i.Title,
 		Organizer:           i.Organizer,
 		FoundingType:        i.FoundingType,
