@@ -154,6 +154,10 @@ func (svc eventService) GetByIDAsMinimal(ctx context.Context, id uuid.UUID) (ser
 	}, nil
 }
 
+func (svc eventService) Update(_ context.Context, _ uuid.UUID, _ services.EventCreateUpdateInfo) (models.Event, error) {
+	panic("not implemented")
+}
+
 func NewEventServices(storage storages.EventStorageRepository, subjects storages.SubjectStorageRepository,
 	organizer services.OrganizerService,
 	foundingRange, coFoundingRange services.RangeService,

@@ -42,6 +42,7 @@ type EventService interface {
 	GetByID(ctx context.Context, id uuid.UUID) (models.Event, error)
 	Create(ctx context.Context, info EventCreateUpdateInfo) (models.Event, error)
 	Delete(ctx context.Context, id uuid.UUID) error
+	Update(ctx context.Context, id uuid.UUID, info EventCreateUpdateInfo) (models.Event, error)
 
 	GetAllAsMinimal(ctx context.Context) ([]EventMinimal, error)
 	GetByIDAsMinimal(ctx context.Context, id uuid.UUID) (EventMinimal, error)

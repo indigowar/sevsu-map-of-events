@@ -1,6 +1,7 @@
 package json
 
 import (
+	"log"
 	"net/http"
 	"time"
 
@@ -106,6 +107,46 @@ func GetByIDAsMinimalHandler(svc services.EventService) gin.HandlerFunc {
 	}
 }
 
+func CreateEventHandler(svc services.EventService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var info createUpdateInfoBinding
+		if err := c.ShouldBindJSON(&info); err != nil {
+			log.Println(err)
+			c.Status(http.StatusBadRequest)
+			return
+		}
+
+		result, err := svc.Create(c, toUpdateCreateInfo(info))
+		if err != nil {
+			log.Println(err)
+			c.Status(http.StatusInternalServerError)
+		}
+
+		c.JSON(http.StatusCreated, fromModel(result))
+	}
+}
+
+func UpdateEventHandler(svc services.EventService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		paramId := c.Param("id")
+		_, err := uuid.Parse(paramId)
+		if err != nil {
+			log.Println(err)
+			c.Status(http.StatusBadRequest)
+			return
+		}
+
+		var info createUpdateInfoBinding
+		if err := c.ShouldBindJSON(&info); err != nil {
+			log.Println(err)
+			c.Status(http.StatusBadRequest)
+			return
+		}
+
+		panic("not implemented")
+	}
+}
+
 type eventMinimalBinding struct {
 	ID                 uuid.UUID `json:"ID"`
 	Title              string    `json:"title"`
@@ -151,5 +192,47 @@ func fromModel(e models.Event) eventBinding {
 		TRL:                 e.TRL,
 		Competitors:         e.Competitors,
 		Subjects:            e.Subjects,
+	}
+}
+
+type createUpdateInfoBinding struct {
+	Title               string      `json:"title"`
+	Organizer           uuid.UUID   `json:"organizer"`
+	FoundingType        string      `json:"foundingType"`
+	FoundingRangeLow    int         `json:"foundingRangeLow"`
+	FoundingRangeHigh   int         `json:"foundingRangeHigh"`
+	CoFoundingRangeLow  int         `json:"coFoundingRangeLow"`
+	CoFoundingRangeHigh int         `json:"coFoundingRangeHigh"`
+	SubmissionDeadline  time.Time   `json:"submissionDeadline"`
+	ConsiderationPeriod string      `json:"considerationPeriod"`
+	RealisationPeriod   string      `json:"realisationPeriod"`
+	Result              string      `json:"result"`
+	Site                string      `json:"site"`
+	Document            string      `json:"document"`
+	InternalContacts    string      `json:"internalContacts"`
+	TRL                 int         `json:"TRL"`
+	Competitors         []uuid.UUID `json:"competitors"`
+	Subjects            []string    `json:"subjects"`
+}
+
+func toUpdateCreateInfo(i createUpdateInfoBinding) services.EventCreateUpdateInfo {
+	return services.EventCreateUpdateInfo{
+		Title:               i.Title,
+		Organizer:           i.Organizer,
+		FoundingType:        i.FoundingType,
+		FoundingRangeLow:    i.FoundingRangeLow,
+		FoundingRangeHigh:   i.FoundingRangeHigh,
+		CoFoundingRangeHigh: i.CoFoundingRangeHigh,
+		CoFoundingRangeLow:  i.CoFoundingRangeLow,
+		SubmissionDeadline:  i.SubmissionDeadline,
+		ConsiderationPeriod: i.ConsiderationPeriod,
+		RealisationPeriod:   i.RealisationPeriod,
+		Result:              i.Result,
+		Site:                i.Site,
+		Document:            i.Document,
+		InternalContacts:    i.InternalContacts,
+		TRL:                 i.TRL,
+		Competitors:         i.Competitors,
+		Subjects:            i.Subjects,
 	}
 }

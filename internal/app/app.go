@@ -42,11 +42,14 @@ func Run(cfg *config.Config) {
 
 	foundingRangeStorage := storages.NewFoundingRangePostgresStorage(conn)
 	coFoundingRangeStorage := storages.NewCoFoundingRangePostgresStorage(conn)
+	subjectStorage := storages.NewPostgresSubjectStorage(conn)
+	eventStorage := storages.NewPostgresEventStorage(conn, subjectStorage)
 
 	competitorService := services.NewCompetitorService(competitorStorage)
 	organizerService, _ := services.NewOrganizerService(organizerStorage)
 	foundingService := services.NewFoundingRangeService(foundingRangeStorage)
 	coFoundingService := services.NewCoFoundingRangeService(coFoundingRangeStorage)
+	eventService := services.NewEventServices(eventStorage, subjectStorage, organizerService, foundingService, coFoundingService, competitorService)
 
 	r := gin.Default()
 
@@ -70,6 +73,16 @@ func Run(cfg *config.Config) {
 		v1.POST("/organizer/", json.CreateOrganizerHandler(organizerService))
 		v1.GET("/organizer/:id", json.GetByIDOrganizerHandler(organizerService))
 		v1.POST("/organizer/:id", json.UpdateOrganizerHandler(organizerService)) // TODO: implement
+
+		v1.GET("/event/", json.GetAllEventHandler(eventService))
+		v1.POST("/event/", json.CreateEventHandler(eventService))
+
+		v1.GET("/event/:id/", json.GetByIDEventHandler(eventService))
+		v1.DELETE("/event/:id", json.DeleteEventHandler(eventService))
+		v1.POST("/event/:id", json.UpdateEventHandler(eventService)) // TODO: implement
+
+		v1.GET("/minimal_event/", json.GetAllAsMinimalHandler(eventService))
+		v1.GET("/minimal_event/:id", json.GetByIDAsMinimalHandler(eventService))
 	}
 
 	server := &http.Server{
