@@ -51,3 +51,9 @@ type Event struct {
 	Competitors         []uuid.UUID
 	Subjects            []uuid.UUID
 }
+
+type Subject struct {
+	ID      uuid.UUID
+	Name    string
+	EventID uuid.UUID
+}
