@@ -19,4 +19,6 @@ type EventStorageRepository interface {
 	AddCompetitor(ctx context.Context, id, competitorId uuid.UUID) error
 	RemoveCompetitor(ctx context.Context, id, competitorId uuid.UUID) error
 	GetCompetitors(ctx context.Context, id uuid.UUID) ([]uuid.UUID, error)
+
+	StorageTransaction
 }

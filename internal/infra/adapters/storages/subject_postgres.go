@@ -18,6 +18,15 @@ type postgresSubjectStorage struct {
 	pool *pgxpool.Pool
 }
 
+func (s postgresSubjectStorage) InvokeTransactionMechanism(ctx context.Context) (interface{}, error) {
+	return s.pool.Begin(ctx)
+}
+
+func (s postgresSubjectStorage) ShadowTransactionMechanism(ctx context.Context, transaction interface{}) error {
+	tx := transaction.(*pgxpool.Tx)
+	return tx.Rollback(ctx)
+}
+
 func (s postgresSubjectStorage) GetByID(ctx context.Context, id uuid.UUID) (models.Subject, error) {
 	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
 

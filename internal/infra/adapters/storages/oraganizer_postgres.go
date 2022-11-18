@@ -18,6 +18,15 @@ type PostgresOrganizerStorage struct {
 	pool *pgxpool.Pool
 }
 
+func (s PostgresOrganizerStorage) InvokeTransactionMechanism(ctx context.Context) (interface{}, error) {
+	return s.pool.Begin(ctx)
+}
+
+func (s PostgresOrganizerStorage) ShadowTransactionMechanism(ctx context.Context, transaction interface{}) error {
+	tx := transaction.(*pgxpool.Tx)
+	return tx.Rollback(ctx)
+}
+
 func NewPostgresOrganizerStorage(p *pgxpool.Pool) storages.OrganizerStorageRepository {
 	return &PostgresOrganizerStorage{
 		pool: p,

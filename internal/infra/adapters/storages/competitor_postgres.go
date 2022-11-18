@@ -92,6 +92,15 @@ func (s PostgresCompetitorStorage) Delete(ctx context.Context, id uuid.UUID) err
 	return err
 }
 
+func (s PostgresCompetitorStorage) InvokeTransactionMechanism(ctx context.Context) (interface{}, error) {
+	return s.pool.Begin(ctx), nil
+}
+
+func (s PostgresCompetitorStorage) ShadowTransactionMechanism(ctx context.Context, transaction interface{}) error {
+	tx := transaction.(*pgxpool.Tx)
+	return tx.Rollback(ctx)
+}
+
 func NewPostgresCompetitorStorage(p *pgxpool.Pool) storages.CompetitorStorage {
 	return &PostgresCompetitorStorage{pool: p}
 }

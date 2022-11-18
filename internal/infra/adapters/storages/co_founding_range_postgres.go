@@ -18,6 +18,15 @@ type coFoundingRangePostgresStorage struct {
 	pool *pgxpool.Pool
 }
 
+func (s coFoundingRangePostgresStorage) InvokeTransactionMechanism(ctx context.Context) (interface{}, error) {
+	return s.pool.Begin(ctx), nil
+}
+
+func (s coFoundingRangePostgresStorage) ShadowTransactionMechanism(ctx context.Context, transaction interface{}) error {
+	tx := transaction.(*pgxpool.Tx)
+	return tx.Rollback(ctx)
+}
+
 func (s coFoundingRangePostgresStorage) GetByID(ctx context.Context, id uuid.UUID) (models.RangeModel, error) {
 	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
 	var low, high int
@@ -66,7 +75,6 @@ func (s coFoundingRangePostgresStorage) Delete(ctx context.Context, id uuid.UUID
 
 	return nil
 }
-
 func NewCoFoundingRangePostgresStorage(p *pgxpool.Pool) storages.RangeStorageRepository {
 	return &coFoundingRangePostgresStorage{
 		pool: p,

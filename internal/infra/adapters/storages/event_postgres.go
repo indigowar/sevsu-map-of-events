@@ -12,18 +12,30 @@ import (
 
 	"github.com/indigowar/map-of-events/internal/domain/models"
 	"github.com/indigowar/map-of-events/internal/domain/repos/adapters/storages"
+	"github.com/indigowar/map-of-events/pkg/postgres"
 )
 
 type postgresEventStorage struct {
 	pool *pgxpool.Pool
 }
 
+func (s postgresEventStorage) InvokeTransactionMechanism(ctx context.Context) (interface{}, error) {
+	return s.pool.Begin(ctx), nil
+}
+
+func (s postgresEventStorage) ShadowTransactionMechanism(ctx context.Context, transaction interface{}) error {
+	tx := transaction.(*pgxpool.Tx)
+	return tx.Rollback(ctx)
+}
+
 func (s postgresEventStorage) GetIDList(ctx context.Context) ([]uuid.UUID, error) {
+	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
+
 	query := "SELECT event_id FROM event"
 
 	results := make([]uuid.UUID, 0)
 
-	rows, err := s.pool.Query(ctx, query)
+	rows, err := dataSource.Query(ctx, query)
 	if err != nil {
 		log.Println(err)
 		return nil, errors.New("failed to read database")
@@ -54,11 +66,13 @@ func (s postgresEventStorage) Filter(_ context.Context) ([]uuid.UUID, error) {
 }
 
 func (s postgresEventStorage) GetByID(ctx context.Context, id uuid.UUID) (models.Event, error) {
+	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
+
 	query := fmt.Sprintf("SELECT * FROM event WHERE event_id = '%s'", id.String())
 
 	var event models.Event
 
-	err := s.pool.QueryRow(ctx, query).Scan(
+	err := dataSource.QueryRow(ctx, query).Scan(
 		&event.ID, &event.Title, &event.Organizer, &event.FoundingType, &event.FoundingRange, &event.CoFoundingRange, &event.SubmissionDeadline,
 		&event.ConsiderationPeriod, &event.RealisationPeriod, &event.Result, &event.Site, &event.Document, &event.InternalContacts,
 		&event.TRL,

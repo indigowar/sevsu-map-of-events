@@ -48,71 +48,77 @@ func (svc eventService) GetByID(ctx context.Context, id uuid.UUID) (models.Event
 }
 
 func (svc eventService) Create(ctx context.Context, info services.EventCreateInfo) (models.Event, error) {
-	eventId := uuid.New()
+	panic("not implement")
+	//eventId := uuid.New()
+	//
+	//var undoError error = nil
+	//
 
-	var undoError error = nil
+	//if _, err := svc.organizer.GetByID(ctx, info.Organizer); err != nil {
+	//	return models.Event{}, errors.New("not found - organizer")
+	//}
 
-	if _, err := svc.organizer.GetByID(ctx, info.Organizer); err != nil {
-		return models.Event{}, nil
-	}
-
-	founding, err := svc.foundingRanges.Create(ctx, info.FoundingRangeLow, info.FoundingRangeHigh)
-	if err != nil {
-		return models.Event{}, errors.New("internal error")
-	}
-	defer func() {
-		if undoError != nil {
-			_ = svc.foundingRanges.Delete(context.TODO(), founding.ID)
-		}
-	}()
-
-	coFounding, err := svc.coFoundingRanges.Create(ctx, info.CoFoundingRangeLow, info.CoFoundingRangeHigh)
-	if err != nil {
-		undoError = errors.New("range_svc to event_svc: " + err.Error())
-		return models.Event{}, errors.New("internal error")
-	}
-
-	subjects := make([]uuid.UUID, 0)
-
-	event := models.Event{
-		ID:                  eventId,
-		Title:               info.Title,
-		Organizer:           info.Organizer,
-		FoundingType:        info.FoundingType,
-		FoundingRange:       founding.ID,
-		CoFoundingRange:     coFounding.ID,
-		SubmissionDeadline:  info.SubmissionDeadline,
-		ConsiderationPeriod: info.ConsiderationPeriod,
-		RealisationPeriod:   info.RealisationPeriod,
-		Result:              info.Result,
-		Site:                info.Site,
-		Document:            info.Document,
-		InternalContacts:    info.InternalContacts,
-		TRL:                 info.TRL,
-		Competitors:         subjects,
-	}
-
-	if err := svc.eventStorage.Create(ctx, event); err != nil {
-		log.Println(err)
-		undoError = errors.New("failed to create event")
-		return models.Event{}, errors.New("internal error")
-	}
-	defer func() {
-		if undoError != nil {
-			_ = svc.Delete(context.TODO(), eventId)
-		}
-	}()
-
-	for _, v := range info.Subjects {
-		id := uuid.New()
-		_ = svc.subjectStorage.Add(ctx, models.Subject{
-			ID:   id,
-			Name: v,
-		})
-		subjects = append(subjects, id)
-	}
-
-	return event, nil
+	//if _, err := svc.organizer.GetByID(ctx, info.Organizer); err != nil {
+	//	return models.Event{}, nil
+	//}
+	//
+	//founding, err := svc.foundingRanges.Create(ctx, info.FoundingRangeLow, info.FoundingRangeHigh)
+	//if err != nil {
+	//	return models.Event{}, errors.New("internal error")
+	//}
+	//defer func() {
+	//	if undoError != nil {
+	//		_ = svc.foundingRanges.Delete(context.TODO(), founding.ID)
+	//	}
+	//}()
+	//
+	//coFounding, err := svc.coFoundingRanges.Create(ctx, info.CoFoundingRangeLow, info.CoFoundingRangeHigh)
+	//if err != nil {
+	//	undoError = errors.New("range_svc to event_svc: " + err.Error())
+	//	return models.Event{}, errors.New("internal error")
+	//}
+	//
+	//subjects := make([]uuid.UUID, 0)
+	//
+	//event := models.Event{
+	//	ID:                  eventId,
+	//	Title:               info.Title,
+	//	Organizer:           info.Organizer,
+	//	FoundingType:        info.FoundingType,
+	//	FoundingRange:       founding.ID,
+	//	CoFoundingRange:     coFounding.ID,
+	//	SubmissionDeadline:  info.SubmissionDeadline,
+	//	ConsiderationPeriod: info.ConsiderationPeriod,
+	//	RealisationPeriod:   info.RealisationPeriod,
+	//	Result:              info.Result,
+	//	Site:                info.Site,
+	//	Document:            info.Document,
+	//	InternalContacts:    info.InternalContacts,
+	//	TRL:                 info.TRL,
+	//	Competitors:         subjects,
+	//}
+	//
+	//if err := svc.eventStorage.Create(ctx, event); err != nil {
+	//	log.Println(err)
+	//	undoError = errors.New("failed to create event")
+	//	return models.Event{}, errors.New("internal error")
+	//}
+	//defer func() {
+	//	if undoError != nil {
+	//		_ = svc.Delete(context.TODO(), eventId)
+	//	}
+	//}()
+	//
+	//for _, v := range info.Subjects {
+	//	id := uuid.New()
+	//	_ = svc.subjectStorage.Add(ctx, models.Subject{
+	//		ID:   id,
+	//		Name: v,
+	//	})
+	//	subjects = append(subjects, id)
+	//}
+	//
+	//return event, nil
 }
 
 func (svc eventService) Delete(ctx context.Context, id uuid.UUID) error {

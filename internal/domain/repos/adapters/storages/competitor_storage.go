@@ -14,4 +14,6 @@ type CompetitorStorage interface {
 	Create(ctx context.Context, competitor models.Competitor) error
 	Update(ctx context.Context, competitor models.Competitor) error
 	Delete(ctx context.Context, id uuid.UUID) error
+
+	StorageTransaction
 }

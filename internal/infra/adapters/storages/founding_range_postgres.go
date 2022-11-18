@@ -18,6 +18,15 @@ type foundingRangeStorage struct {
 	pool *pgxpool.Pool
 }
 
+func (s foundingRangeStorage) InvokeTransactionMechanism(ctx context.Context) (interface{}, error) {
+	return s.pool.Begin(ctx), nil
+}
+
+func (s foundingRangeStorage) ShadowTransactionMechanism(ctx context.Context, transaction interface{}) error {
+	tx := transaction.(*pgxpool.Tx)
+	return tx.Rollback(ctx)
+}
+
 func (s foundingRangeStorage) GetByID(ctx context.Context, id uuid.UUID) (models.RangeModel, error) {
 	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
 

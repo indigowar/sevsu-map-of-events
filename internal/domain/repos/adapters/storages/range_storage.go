@@ -13,4 +13,6 @@ type RangeStorageRepository interface {
 	GetMaximumRange(ctx context.Context) (models.RangeModel, error)
 	Create(ctx context.Context, foundingRange models.RangeModel) (models.RangeModel, error)
 	Delete(ctx context.Context, id uuid.UUID) error
+
+	StorageTransaction
 }
