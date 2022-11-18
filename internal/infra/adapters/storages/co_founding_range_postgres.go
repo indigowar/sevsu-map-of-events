@@ -7,14 +7,14 @@ import (
 	"log"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/indigowar/map-of-events/internal/domain/models"
 	"github.com/indigowar/map-of-events/internal/domain/repos/adapters/storages"
 )
 
 type coFoundingRangePostgresStorage struct {
-	con *pgx.Conn
+	pool *pgxpool.Pool
 }
 
 func (s coFoundingRangePostgresStorage) GetByID(ctx context.Context, id uuid.UUID) (models.RangeModel, error) {
@@ -22,7 +22,7 @@ func (s coFoundingRangePostgresStorage) GetByID(ctx context.Context, id uuid.UUI
 
 	query := fmt.Sprintf("SELECT co_founding_low, co_founding_high FROM co_founding_range WHERE co_founding_range_id = '%s'", id.String())
 
-	if err := s.con.QueryRow(ctx, query).Scan(&low, &high); err != nil {
+	if err := s.pool.QueryRow(ctx, query).Scan(&low, &high); err != nil {
 		log.Println("Got query error or scan error: ", err)
 		return models.RangeModel{}, err
 	}
@@ -32,8 +32,8 @@ func (s coFoundingRangePostgresStorage) GetByID(ctx context.Context, id uuid.UUI
 
 func (s coFoundingRangePostgresStorage) GetMaximumRange(ctx context.Context) (models.RangeModel, error) {
 	var low, high int
-	if s.con.QueryRow(ctx, "SELECT MIN(co_founding_low) FROM co_founding_range").Scan(&low) != nil ||
-		s.con.QueryRow(ctx, "SELECT MAX(co_founding_high) FROM co_founding_range").Scan(&high) != nil {
+	if s.pool.QueryRow(ctx, "SELECT MIN(co_founding_low) FROM co_founding_range").Scan(&low) != nil ||
+		s.pool.QueryRow(ctx, "SELECT MAX(co_founding_high) FROM co_founding_range").Scan(&high) != nil {
 		return models.RangeModel{}, errors.New("failed to read database")
 	}
 	return models.RangeModel{Low: low, High: high}, nil
@@ -41,7 +41,7 @@ func (s coFoundingRangePostgresStorage) GetMaximumRange(ctx context.Context) (mo
 
 func (s coFoundingRangePostgresStorage) Create(ctx context.Context, foundingRange models.RangeModel) (models.RangeModel, error) {
 	command := "INSERT INTO co_founding_range (co_founding_range_id, co_founding_low, co_founding_high) VALUES ($1, $2, $3)"
-	_, err := s.con.Exec(ctx, command, foundingRange.ID, foundingRange.Low, foundingRange.High)
+	_, err := s.pool.Exec(ctx, command, foundingRange.ID, foundingRange.Low, foundingRange.High)
 	if err != nil {
 		log.Println(err)
 		return models.RangeModel{}, errors.New("failed to insert")
@@ -51,7 +51,7 @@ func (s coFoundingRangePostgresStorage) Create(ctx context.Context, foundingRang
 }
 
 func (s coFoundingRangePostgresStorage) Delete(ctx context.Context, id uuid.UUID) error {
-	if _, err := s.con.Exec(ctx, "DELETE FROM co_founding_range WHERE co_founding_range_id = $1", id); err != nil {
+	if _, err := s.pool.Exec(ctx, "DELETE FROM co_founding_range WHERE co_founding_range_id = $1", id); err != nil {
 		log.Println(err)
 		return errors.New("failed to delete from database")
 	}
@@ -59,8 +59,8 @@ func (s coFoundingRangePostgresStorage) Delete(ctx context.Context, id uuid.UUID
 	return nil
 }
 
-func NewCoFoundingRangePostgresStorage(con *pgx.Conn) storages.RangeStorageRepository {
+func NewCoFoundingRangePostgresStorage(p *pgxpool.Pool) storages.RangeStorageRepository {
 	return &coFoundingRangePostgresStorage{
-		con: con,
+		pool: p,
 	}
 }

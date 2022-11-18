@@ -11,7 +11,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/indigowar/map-of-events/internal/config"
 	"github.com/indigowar/map-of-events/internal/infra/adapters/storages"
@@ -27,23 +27,19 @@ func Run(cfg *config.Config) {
 		cfg.Postgres.Port,
 		cfg.Postgres.Name)
 	log.Println(url)
-	conn, err := pgx.Connect(context.Background(), url)
 
+	postgresCPool, err := pgxpool.New(context.Background(), url)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	defer conn.Close(context.Background())
+	defer postgresCPool.Close()
 
-	competitorStorage, err := storages.NewPostgresCompetitorStorage(conn)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	organizerStorage, _ := storages.NewPostgresOrganizerStorage(conn)
-
-	foundingRangeStorage := storages.NewFoundingRangePostgresStorage(conn)
-	coFoundingRangeStorage := storages.NewCoFoundingRangePostgresStorage(conn)
-	subjectStorage := storages.NewPostgresSubjectStorage(conn)
-	eventStorage := storages.NewPostgresEventStorage(conn, subjectStorage)
+	competitorStorage := storages.NewPostgresCompetitorStorage(postgresCPool)
+	organizerStorage := storages.NewPostgresOrganizerStorage(postgresCPool)
+	foundingRangeStorage := storages.NewFoundingRangePostgresStorage(postgresCPool)
+	coFoundingRangeStorage := storages.NewCoFoundingRangePostgresStorage(postgresCPool)
+	subjectStorage := storages.NewPostgresSubjectStorage(postgresCPool)
+	eventStorage := storages.NewPostgresEventStorage(postgresCPool)
 
 	competitorService := services.NewCompetitorService(competitorStorage)
 	organizerService, _ := services.NewOrganizerService(organizerStorage)

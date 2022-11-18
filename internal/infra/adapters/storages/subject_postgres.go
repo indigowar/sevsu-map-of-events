@@ -7,14 +7,14 @@ import (
 	"log"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/indigowar/map-of-events/internal/domain/models"
 	"github.com/indigowar/map-of-events/internal/domain/repos/adapters/storages"
 )
 
 type postgresSubjectStorage struct {
-	con *pgx.Conn
+	pool *pgxpool.Pool
 }
 
 func (s postgresSubjectStorage) GetByID(ctx context.Context, id uuid.UUID) (models.Subject, error) {
@@ -24,7 +24,7 @@ func (s postgresSubjectStorage) GetByID(ctx context.Context, id uuid.UUID) (mode
 		ID: id,
 	}
 
-	if err := s.con.QueryRow(ctx, query).Scan(&subject.ID, &subject.Name, &subject.Name); err != nil {
+	if err := s.pool.QueryRow(ctx, query).Scan(&subject.ID, &subject.Name, &subject.Name); err != nil {
 		log.Println(err)
 		return models.Subject{}, errors.New("failed to read from database")
 	}
@@ -35,7 +35,7 @@ func (s postgresSubjectStorage) GetByID(ctx context.Context, id uuid.UUID) (mode
 func (s postgresSubjectStorage) GetByEvent(ctx context.Context, id uuid.UUID) ([]uuid.UUID, error) {
 	query := fmt.Sprintf("SELECT subject_id FROM subject WHERE subject_event = '%s'", id.String())
 
-	rows, err := s.con.Query(ctx, query)
+	rows, err := s.pool.Query(ctx, query)
 	if err != nil {
 		log.Println(err)
 		return nil, errors.New("failed to read data from database")
@@ -64,7 +64,7 @@ func (s postgresSubjectStorage) GetByEvent(ctx context.Context, id uuid.UUID) ([
 }
 
 func (s postgresSubjectStorage) GetAll(ctx context.Context) ([]models.Subject, error) {
-	rows, err := s.con.Query(ctx, "SELECT subject_id, subject_name FROM subject")
+	rows, err := s.pool.Query(ctx, "SELECT subject_id, subject_name FROM subject")
 	if err != nil {
 		log.Println(err)
 		return nil, errors.New("failed to read data")
@@ -94,7 +94,7 @@ func (s postgresSubjectStorage) GetAll(ctx context.Context) ([]models.Subject, e
 
 func (s postgresSubjectStorage) Add(ctx context.Context, subject models.Subject) error {
 	command := "INSERT INTO subject(subject_id, subject_name, subject_event) VALUES ($1, $2, $3)"
-	_, err := s.con.Exec(ctx, command, subject.ID, subject.Name, subject.EventID)
+	_, err := s.pool.Exec(ctx, command, subject.ID, subject.Name, subject.EventID)
 	if err != nil {
 		log.Println(err)
 		return errors.New("failed to write in the database")
@@ -105,7 +105,7 @@ func (s postgresSubjectStorage) Add(ctx context.Context, subject models.Subject)
 func (s postgresSubjectStorage) Delete(ctx context.Context, id uuid.UUID) error {
 	command := "DELETE FROM subject WHERE subject_name = $1"
 
-	if _, err := s.con.Exec(ctx, command, id); err != nil {
+	if _, err := s.pool.Exec(ctx, command, id); err != nil {
 		log.Println(err)
 		return errors.New("failed to delete from database")
 	}
@@ -115,15 +115,15 @@ func (s postgresSubjectStorage) Delete(ctx context.Context, id uuid.UUID) error 
 func (s postgresSubjectStorage) Update(ctx context.Context, subject models.Subject) error {
 	command := "UPDATE subject SET subject_name = $1, subject_event = $2 WHERE subject_id = $3"
 
-	if _, err := s.con.Exec(ctx, command, subject.Name, subject.EventID, subject.ID); err != nil {
+	if _, err := s.pool.Exec(ctx, command, subject.Name, subject.EventID, subject.ID); err != nil {
 		log.Println(err)
 		return errors.New("failed to update the database")
 	}
 	return nil
 }
 
-func NewPostgresSubjectStorage(con *pgx.Conn) storages.SubjectStorageRepository {
+func NewPostgresSubjectStorage(p *pgxpool.Pool) storages.SubjectStorageRepository {
 	return &postgresSubjectStorage{
-		con: con,
+		pool: p,
 	}
 }

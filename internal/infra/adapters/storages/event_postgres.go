@@ -8,14 +8,14 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/indigowar/map-of-events/internal/domain/models"
 	"github.com/indigowar/map-of-events/internal/domain/repos/adapters/storages"
 )
 
 type postgresEventStorage struct {
-	con      *pgx.Conn
-	subjects storages.SubjectStorageRepository
+	pool *pgxpool.Pool
 }
 
 func (s postgresEventStorage) GetIDList(ctx context.Context) ([]uuid.UUID, error) {
@@ -23,7 +23,7 @@ func (s postgresEventStorage) GetIDList(ctx context.Context) ([]uuid.UUID, error
 
 	results := make([]uuid.UUID, 0)
 
-	rows, err := s.con.Query(ctx, query)
+	rows, err := s.pool.Query(ctx, query)
 	if err != nil {
 		log.Println(err)
 		return nil, errors.New("failed to read database")
@@ -58,7 +58,7 @@ func (s postgresEventStorage) GetByID(ctx context.Context, id uuid.UUID) (models
 
 	var event models.Event
 
-	err := s.con.QueryRow(ctx, query).Scan(
+	err := s.pool.QueryRow(ctx, query).Scan(
 		&event.ID, &event.Title, &event.Organizer, &event.FoundingType, &event.FoundingRange, &event.CoFoundingRange, &event.SubmissionDeadline,
 		&event.ConsiderationPeriod, &event.RealisationPeriod, &event.Result, &event.Site, &event.Document, &event.InternalContacts,
 		&event.TRL,
@@ -88,7 +88,7 @@ func (s postgresEventStorage) Create(ctx context.Context, event models.Event) er
 		 $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
 		)`
 
-	transaction, err := s.con.Begin(ctx)
+	transaction, err := s.pool.Begin(ctx)
 
 	if err != nil {
 		log.Println(err)
@@ -111,7 +111,7 @@ func (s postgresEventStorage) Create(ctx context.Context, event models.Event) er
 }
 
 func (s postgresEventStorage) Delete(ctx context.Context, id uuid.UUID) error {
-	tx, err := s.con.Begin(ctx)
+	tx, err := s.pool.Begin(ctx)
 	if err != nil {
 		log.Println(err)
 		return errors.New("transaction failure")
@@ -135,7 +135,7 @@ func (s postgresEventStorage) Delete(ctx context.Context, id uuid.UUID) error {
 
 func (s postgresEventStorage) Update(ctx context.Context, event models.Event) error {
 	// TODO: Add updating of competitor requirements
-	tx, err := s.con.Begin(ctx)
+	tx, err := s.pool.Begin(ctx)
 	if err != nil {
 		log.Println(err)
 		return errors.New("failed to start a transaction")
@@ -174,7 +174,7 @@ func (s postgresEventStorage) Update(ctx context.Context, event models.Event) er
 
 func (s postgresEventStorage) AddCompetitor(ctx context.Context, id, competitorId uuid.UUID) error {
 	command := "INSERT INTO competitor_requirements(cr_id, cr_event, cr_competitor) VALUES ($1, $2, $3)"
-	_, err := s.con.Exec(ctx, command, uuid.New(), id, competitorId)
+	_, err := s.pool.Exec(ctx, command, uuid.New(), id, competitorId)
 	if err != nil {
 		log.Println(err)
 		return errors.New("failed to write into database")
@@ -184,7 +184,7 @@ func (s postgresEventStorage) AddCompetitor(ctx context.Context, id, competitorI
 
 func (s postgresEventStorage) RemoveCompetitor(ctx context.Context, id, competitorId uuid.UUID) error {
 	command := "DELETE FROM competitor_requirements WHERE cr_event=$1 AND cr_competitor=$2"
-	_, err := s.con.Exec(ctx, command, id, competitorId)
+	_, err := s.pool.Exec(ctx, command, id, competitorId)
 	if err != nil {
 		log.Println(err)
 		return errors.New("failed to delete from database")
@@ -195,7 +195,7 @@ func (s postgresEventStorage) RemoveCompetitor(ctx context.Context, id, competit
 func (s postgresEventStorage) GetCompetitors(ctx context.Context, id uuid.UUID) ([]uuid.UUID, error) {
 	query := fmt.Sprintf("SELECT cr_competitor FROM competitor_requirements WHERE cr_event='%s'", id.String())
 
-	rows, err := s.con.Query(ctx, query)
+	rows, err := s.pool.Query(ctx, query)
 	if err != nil {
 		log.Println(err)
 		return nil, errors.New("failed to read from database")
@@ -221,9 +221,8 @@ func (s postgresEventStorage) GetCompetitors(ctx context.Context, id uuid.UUID) 
 	return ids, nil
 }
 
-func NewPostgresEventStorage(con *pgx.Conn, subjects storages.SubjectStorageRepository) storages.EventStorageRepository {
+func NewPostgresEventStorage(p *pgxpool.Pool) storages.EventStorageRepository {
 	return &postgresEventStorage{
-		con:      con,
-		subjects: subjects,
+		pool: p,
 	}
 }

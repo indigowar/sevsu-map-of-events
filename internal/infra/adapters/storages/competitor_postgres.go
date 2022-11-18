@@ -7,14 +7,14 @@ import (
 	"log"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/indigowar/map-of-events/internal/domain/models"
 	"github.com/indigowar/map-of-events/internal/domain/repos/adapters/storages"
 )
 
 type PostgresCompetitorStorage struct {
-	con *pgx.Conn
+	pool *pgxpool.Pool
 }
 
 func (s PostgresCompetitorStorage) Get(ctx context.Context, id uuid.UUID) (models.Competitor, error) {
@@ -23,7 +23,7 @@ func (s PostgresCompetitorStorage) Get(ctx context.Context, id uuid.UUID) (model
 
 	query := fmt.Sprintf("SELECT * FROM competitor WHERE competitor_id == '%s'", id.String())
 
-	if err := s.con.QueryRow(ctx, query).Scan(&Id, &name); err != nil {
+	if err := s.pool.QueryRow(ctx, query).Scan(&Id, &name); err != nil {
 		log.Println("Got query error or scan error: ", err)
 		return models.Competitor{}, err
 	}
@@ -34,7 +34,7 @@ func (s PostgresCompetitorStorage) Get(ctx context.Context, id uuid.UUID) (model
 func (s PostgresCompetitorStorage) GetAll(ctx context.Context) ([]models.Competitor, error) {
 	comps := make([]models.Competitor, 0)
 
-	rows, err := s.con.Query(ctx, "SELECT * FROM competitor")
+	rows, err := s.pool.Query(ctx, "SELECT * FROM competitor")
 	if err != nil {
 		log.Println("Failed to read from database")
 		return nil, err
@@ -60,7 +60,7 @@ func (s PostgresCompetitorStorage) GetAll(ctx context.Context) ([]models.Competi
 
 func (s PostgresCompetitorStorage) Create(ctx context.Context, competitor models.Competitor) error {
 	command := "INSERT INTO competitor (competitor_id, competitor_name) VALUES ($1, $2)"
-	if _, err := s.con.Exec(ctx, command, competitor.ID, competitor.Name); err != nil {
+	if _, err := s.pool.Exec(ctx, command, competitor.ID, competitor.Name); err != nil {
 		log.Println(err)
 		return errors.New("failed to create new competitor")
 	}
@@ -69,7 +69,7 @@ func (s PostgresCompetitorStorage) Create(ctx context.Context, competitor models
 
 func (s PostgresCompetitorStorage) Update(ctx context.Context, competitor models.Competitor) error {
 	command := "UPDATE competitor SET competitor_name = $2 WHERE competitor_id = $1"
-	if _, err := s.con.Exec(ctx, command, competitor.ID, competitor.Name); err != nil {
+	if _, err := s.pool.Exec(ctx, command, competitor.ID, competitor.Name); err != nil {
 		log.Println(err)
 		return errors.New("failed to update a competitor")
 	}
@@ -77,18 +77,10 @@ func (s PostgresCompetitorStorage) Update(ctx context.Context, competitor models
 }
 
 func (s PostgresCompetitorStorage) Delete(ctx context.Context, id uuid.UUID) error {
-	_, err := s.con.Exec(ctx, "DELETE FROM competitor WHERE competitor_id = $1", id)
+	_, err := s.pool.Exec(ctx, "DELETE FROM competitor WHERE competitor_id = $1", id)
 	return err
 }
 
-func NewPostgresCompetitorStorage(con *pgx.Conn) (storages.CompetitorStorage, error) {
-	if con == nil {
-		return nil, errors.New("invalid connection")
-	}
-
-	if con.IsClosed() {
-		return nil, errors.New("connection is closed")
-	}
-
-	return &PostgresCompetitorStorage{con: con}, nil
+func NewPostgresCompetitorStorage(p *pgxpool.Pool) storages.CompetitorStorage {
+	return &PostgresCompetitorStorage{pool: p}
 }
