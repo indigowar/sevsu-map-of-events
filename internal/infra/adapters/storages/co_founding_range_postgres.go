@@ -19,7 +19,7 @@ type coFoundingRangePostgresStorage struct {
 }
 
 func (s coFoundingRangePostgresStorage) InvokeTransactionMechanism(ctx context.Context) (interface{}, error) {
-	return s.pool.Begin(ctx), nil
+	return s.pool.Begin(ctx)
 }
 
 func (s coFoundingRangePostgresStorage) ShadowTransactionMechanism(ctx context.Context, transaction interface{}) error {

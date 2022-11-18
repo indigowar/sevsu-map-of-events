@@ -45,7 +45,8 @@ func Run(cfg *config.Config) {
 	organizerService, _ := services.NewOrganizerService(organizerStorage)
 	foundingService := services.NewFoundingRangeService(foundingRangeStorage)
 	coFoundingService := services.NewCoFoundingRangeService(coFoundingRangeStorage)
-	eventService := services.NewEventServices(eventStorage, subjectStorage, organizerService, foundingService, coFoundingService, competitorService)
+	subjectService := services.NewSubjectService(subjectStorage)
+	eventService := services.NewEventServices(eventStorage, subjectService, organizerService, foundingService, coFoundingService, competitorService)
 
 	r := gin.Default()
 

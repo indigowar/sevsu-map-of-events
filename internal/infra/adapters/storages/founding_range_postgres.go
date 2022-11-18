@@ -19,7 +19,7 @@ type foundingRangeStorage struct {
 }
 
 func (s foundingRangeStorage) InvokeTransactionMechanism(ctx context.Context) (interface{}, error) {
-	return s.pool.Begin(ctx), nil
+	return s.pool.Begin(ctx)
 }
 
 func (s foundingRangeStorage) ShadowTransactionMechanism(ctx context.Context, transaction interface{}) error {

@@ -20,7 +20,7 @@ type postgresEventStorage struct {
 }
 
 func (s postgresEventStorage) InvokeTransactionMechanism(ctx context.Context) (interface{}, error) {
-	return s.pool.Begin(ctx), nil
+	return s.pool.Begin(ctx)
 }
 
 func (s postgresEventStorage) ShadowTransactionMechanism(ctx context.Context, transaction interface{}) error {

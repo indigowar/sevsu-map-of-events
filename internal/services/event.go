@@ -109,7 +109,50 @@ func (svc eventService) Create(ctx context.Context, info services.EventCreateInf
 }
 
 func (svc eventService) Delete(ctx context.Context, id uuid.UUID) error {
-	return svc.Delete(ctx, id)
+	transaction, err := svc.eventStorage.InvokeTransactionMechanism(ctx)
+	if err != nil {
+		log.Println(err)
+		return errors.New("failed to star a transaction")
+	}
+	defer func() {
+		_ = svc.eventStorage.ShadowTransactionMechanism(ctx, transaction)
+	}()
+	serviceCtx := context.WithValue(ctx, "connection", transaction)
+
+	event, err := svc.GetByID(serviceCtx, id)
+	if err != nil {
+		log.Println(err)
+		return errors.New("not found - event")
+	}
+
+	if svc.foundingRanges.Delete(serviceCtx, event.FoundingRange) != nil {
+		return errors.New("failed to delete - founding range")
+	}
+
+	if svc.coFoundingRanges.Delete(serviceCtx, event.CoFoundingRange) != nil {
+		return errors.New("failed to delete - co founding range")
+	}
+
+	subjects, err := svc.subjects.GetAllForEvent(serviceCtx, event.ID)
+	if err != nil {
+		log.Println(err)
+		return errors.New("failed to get - subjects")
+	}
+
+	for _, v := range subjects {
+		err := svc.subjects.Delete(serviceCtx, v.ID)
+		if err != nil {
+			log.Println(err)
+			return errors.New("failed to delete subject")
+		}
+	}
+
+	err = svc.eventStorage.Delete(serviceCtx, event.ID)
+	if err != nil {
+		log.Println(err)
+		return errors.New("failed to delete event")
+	}
+	return nil
 }
 
 func (svc eventService) GetAllAsMinimal(ctx context.Context) ([]services.EventMinimal, error) {
