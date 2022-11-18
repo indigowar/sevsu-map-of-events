@@ -11,6 +11,7 @@ import (
 
 	"github.com/indigowar/map-of-events/internal/domain/models"
 	"github.com/indigowar/map-of-events/internal/domain/repos/adapters/storages"
+	"github.com/indigowar/map-of-events/pkg/postgres"
 )
 
 type foundingRangeStorage struct {
@@ -18,12 +19,14 @@ type foundingRangeStorage struct {
 }
 
 func (s foundingRangeStorage) GetByID(ctx context.Context, id uuid.UUID) (models.RangeModel, error) {
+	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
+
 	var Id uuid.UUID
 	var low, high int
 
 	query := fmt.Sprintf("SELECT * FROM founding_range WHERE founding_range_id = '%s'", id.String())
 
-	if err := s.pool.QueryRow(ctx, query).Scan(&Id, &low, &high); err != nil {
+	if err := dataSource.QueryRow(ctx, query).Scan(&Id, &low, &high); err != nil {
 		log.Println("Got query error or scan error: ", err)
 		return models.RangeModel{}, err
 	}
@@ -32,18 +35,22 @@ func (s foundingRangeStorage) GetByID(ctx context.Context, id uuid.UUID) (models
 }
 
 func (s foundingRangeStorage) GetMaximumRange(ctx context.Context) (models.RangeModel, error) {
+	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
+
 	var low, high int
-	if s.pool.QueryRow(ctx, "SELECT MIN(founding_range_low) FROM founding_range").Scan(&low) != nil ||
-		s.pool.QueryRow(ctx, "SELECT MAX(founding_range_high) FROM founding_range").Scan(&high) != nil {
+	if dataSource.QueryRow(ctx, "SELECT MIN(founding_range_low) FROM founding_range").Scan(&low) != nil ||
+		dataSource.QueryRow(ctx, "SELECT MAX(founding_range_high) FROM founding_range").Scan(&high) != nil {
 		return models.RangeModel{}, errors.New("failed to read database")
 	}
 	return models.RangeModel{Low: low, High: high}, nil
 }
 
 func (s foundingRangeStorage) Create(ctx context.Context, foundingRange models.RangeModel) (models.RangeModel, error) {
+	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
+
 	command := "INSERT INTO founding_range (founding_range_id, founding_range_low, founding_range_high) VALUES ($1, $2, $3)"
 
-	_, err := s.pool.Exec(ctx, command, foundingRange.ID, foundingRange.Low, foundingRange.High)
+	_, err := dataSource.Exec(ctx, command, foundingRange.ID, foundingRange.Low, foundingRange.High)
 	if err != nil {
 		log.Println(err)
 		return models.RangeModel{}, errors.New("failed to insert")
@@ -53,7 +60,9 @@ func (s foundingRangeStorage) Create(ctx context.Context, foundingRange models.R
 }
 
 func (s foundingRangeStorage) Delete(ctx context.Context, id uuid.UUID) error {
-	if _, err := s.pool.Exec(ctx, "DELETE FROM founding_range WHERE founding_range_id = $1", id); err != nil {
+	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
+
+	if _, err := dataSource.Exec(ctx, "DELETE FROM founding_range WHERE founding_range_id = $1", id); err != nil {
 		log.Println(err)
 		return errors.New("failed to delete from database")
 	}
