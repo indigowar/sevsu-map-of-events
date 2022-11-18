@@ -11,6 +11,7 @@ import (
 
 	"github.com/indigowar/map-of-events/internal/domain/models"
 	"github.com/indigowar/map-of-events/internal/domain/repos/adapters/storages"
+	"github.com/indigowar/map-of-events/pkg/postgres"
 )
 
 type PostgresOrganizerStorage struct {
@@ -24,21 +25,28 @@ func NewPostgresOrganizerStorage(p *pgxpool.Pool) storages.OrganizerStorageRepos
 }
 
 func (s PostgresOrganizerStorage) GetByID(ctx context.Context, id uuid.UUID) (models.Organizer, error) {
-	var Id, level uuid.UUID
-	var name, logo string
-	err := s.pool.QueryRow(ctx, fmt.Sprintf("SELECT * FROM organizer WHERE organizer_id = '%s'", id.String())).Scan(&Id, &name, &logo, &level)
+	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
+
+	var organizer models.Organizer
+
+	command := fmt.Sprintf("SELECT * FROM organizer WHERE organizer_id = '%s'", id.String())
+
+	err := dataSource.QueryRow(ctx, command).Scan(&organizer.ID, &organizer.Name, &organizer.Logo, &organizer.Level)
+
 	if err != nil {
 		log.Println("Failed to read to database")
 		return models.Organizer{}, err
 	}
 
-	return models.Organizer{ID: Id, Name: name, Logo: logo, Level: level}, nil
+	return organizer, nil
 }
 
 func (s PostgresOrganizerStorage) GetAll(ctx context.Context) ([]models.Organizer, error) {
+	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
+
 	organizers := make([]models.Organizer, 0)
 
-	rows, err := s.pool.Query(ctx, "SELECT * FROM organizer")
+	rows, err := dataSource.Query(ctx, "SELECT * FROM organizer")
 	if err != nil {
 		log.Println(err)
 		return nil, errors.New("failed to query database")
@@ -62,9 +70,11 @@ func (s PostgresOrganizerStorage) GetAll(ctx context.Context) ([]models.Organize
 }
 
 func (s PostgresOrganizerStorage) Create(ctx context.Context, organizer models.Organizer) error {
+	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
+
 	command := "INSERT INTO organizer (organizer_id, organizer_name, organizer_image, organizer_level) VALUES ($1, $2, $3, $4)"
 
-	if _, err := s.pool.Exec(ctx, command, organizer.ID, organizer.Name, organizer.Logo, organizer.Level); err != nil {
+	if _, err := dataSource.Exec(ctx, command, organizer.ID, organizer.Name, organizer.Logo, organizer.Level); err != nil {
 		log.Println(err)
 		return errors.New("failed to create organizer")
 	}
@@ -72,14 +82,18 @@ func (s PostgresOrganizerStorage) Create(ctx context.Context, organizer models.O
 }
 
 func (s PostgresOrganizerStorage) Delete(ctx context.Context, id uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, "DELETE FROM organizer WHERE organizer_id=$1", id)
+	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
+
+	_, err := dataSource.Exec(ctx, "DELETE FROM organizer WHERE organizer_id=$1", id)
 	return err
 }
 
 func (s PostgresOrganizerStorage) Update(ctx context.Context, organizer models.Organizer) error {
+	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
+
 	command := "UPDATE organizer SET organizer_name = $2, organizer_image = $3, organizer_level = $4 WHERE organizer_id = $1"
 
-	if _, err := s.pool.Exec(ctx, command, organizer.ID, organizer.Name, organizer.Logo, organizer.Level); err != nil {
+	if _, err := dataSource.Exec(ctx, command, organizer.ID, organizer.Name, organizer.Logo, organizer.Level); err != nil {
 		log.Println(err)
 		return errors.New("failed to update")
 	}
@@ -88,10 +102,12 @@ func (s PostgresOrganizerStorage) Update(ctx context.Context, organizer models.O
 }
 
 func (s PostgresOrganizerStorage) GetLevels(ctx context.Context) ([]models.OrganizerLevel, error) {
+	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
+
 	levels := make([]models.OrganizerLevel, 0)
 
 	query := "SELECT * FROM organizer_level"
-	rows, err := s.pool.Query(ctx, query)
+	rows, err := dataSource.Query(ctx, query)
 
 	if err != nil {
 		log.Println(err)
@@ -116,9 +132,11 @@ func (s PostgresOrganizerStorage) GetLevels(ctx context.Context) ([]models.Organ
 }
 
 func (s PostgresOrganizerStorage) AddLevel(ctx context.Context, level models.OrganizerLevel) error {
+	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
+
 	command := "INSERT INTO organizer_level(organizer_level_id, organizer_level_name, organizer_level_code) VALUES ($1, $2, $3)"
 
-	if _, err := s.pool.Exec(ctx, command, level.ID, level.Name, level.Code); err != nil {
+	if _, err := dataSource.Exec(ctx, command, level.ID, level.Name, level.Code); err != nil {
 		log.Println(err)
 		return errors.New("failed to add to database")
 	}
@@ -126,9 +144,11 @@ func (s PostgresOrganizerStorage) AddLevel(ctx context.Context, level models.Org
 }
 
 func (s PostgresOrganizerStorage) DeleteLevel(ctx context.Context, id uuid.UUID) error {
+	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
+
 	command := "DELETE FROM organizer_level WHERE organizer_level_id = $1"
 
-	if _, err := s.pool.Exec(ctx, command, id); err != nil {
+	if _, err := dataSource.Exec(ctx, command, id); err != nil {
 		log.Println(err)
 		return errors.New("failed to delete from database")
 	}
