@@ -22,8 +22,8 @@ type Connection interface {
 }
 
 func GetConnectionFromContextOrDefault(ctx context.Context, defaultConn Connection) Connection {
-	c := ctx.Value("connection").(Connection)
-	if c != nil {
+	c, ok := ctx.Value("connection").(Connection)
+	if ok {
 		return c
 	}
 	return defaultConn
