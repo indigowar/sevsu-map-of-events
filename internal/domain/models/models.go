@@ -61,3 +61,8 @@ type Subject struct {
 	Name    string
 	EventID uuid.UUID
 }
+
+type StoredImage struct {
+	Link  string
+	Value []byte
+}

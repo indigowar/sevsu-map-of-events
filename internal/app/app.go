@@ -15,6 +15,7 @@ import (
 
 	"github.com/indigowar/map-of-events/internal/config"
 	"github.com/indigowar/map-of-events/internal/infra/adapters/storages"
+	"github.com/indigowar/map-of-events/internal/infra/ports/delivery/http/files"
 	json2 "github.com/indigowar/map-of-events/internal/infra/ports/delivery/http/json"
 	"github.com/indigowar/map-of-events/internal/services"
 )
@@ -40,6 +41,7 @@ func Run(cfg *config.Config) {
 	coFoundingRangeStorage := storages.NewCoFoundingRangePostgresStorage(postgresCPool)
 	subjectStorage := storages.NewPostgresSubjectStorage(postgresCPool)
 	eventStorage := storages.NewPostgresEventStorage(postgresCPool)
+	imageStorage := storages.NewPostgresImageStorage(postgresCPool)
 
 	competitorService := services.NewCompetitorService(competitorStorage)
 	organizerService, _ := services.NewOrganizerService(organizerStorage)
@@ -47,6 +49,8 @@ func Run(cfg *config.Config) {
 	coFoundingService := services.NewCoFoundingRangeService(coFoundingRangeStorage)
 	subjectService := services.NewSubjectService(subjectStorage)
 	eventService := services.NewEventServices(eventStorage, subjectService, organizerService, foundingService, coFoundingService, competitorService)
+
+	imageService := services.NewImageService(imageStorage)
 
 	r := gin.Default()
 
@@ -80,6 +84,9 @@ func Run(cfg *config.Config) {
 
 		v1.GET("/minimal_event/", json2.GetAllAsMinimalHandler(eventService))
 		v1.GET("/minimal_event/:id", json2.GetByIDAsMinimalHandler(eventService))
+
+		v1.GET("/image/:link", files.UploadHandler(imageService))
+		v1.POST("/image/:link", files.RetrievingHandler(imageService))
 	}
 
 	server := &http.Server{

@@ -70,4 +70,9 @@ CREATE TABLE competitor_requirements
     FOREIGN KEY (cr_event) REFERENCES event (event_id),
     cr_competitor UUID,
     FOREIGN KEY (cr_competitor) REFERENCES competitor (competitor_id)
-)
+);
+
+CREATE TABLE images(
+    link VARCHAR(512) PRIMARY KEY,
+    value BYTEA NOT NULL
+);
