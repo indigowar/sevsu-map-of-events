@@ -148,7 +148,7 @@ func UpdateEventHandler(svc services.EventService) gin.HandlerFunc {
 }
 
 type eventMinimalBinding struct {
-	ID                 uuid.UUID `json:"ID"`
+	ID                 uuid.UUID `json:"id"`
 	Title              string    `json:"title"`
 	Organizer          uuid.UUID `json:"organizer"`
 	SubmissionDeadline time.Time `json:"submissionDeadline"`
@@ -156,7 +156,7 @@ type eventMinimalBinding struct {
 }
 
 type eventBinding struct {
-	ID                  uuid.UUID   `json:"ID"`
+	ID                  uuid.UUID   `json:"id"`
 	Title               string      `json:"title"`
 	Organizer           uuid.UUID   `json:"organizer"`
 	FoundingType        string      `json:"foundingType"`
@@ -169,7 +169,7 @@ type eventBinding struct {
 	Site                string      `json:"site"`
 	Document            string      `json:"document"`
 	InternalContacts    string      `json:"internalContacts"`
-	TRL                 int         `json:"TRL"`
+	TRL                 int         `json:"trl"`
 	Competitors         []uuid.UUID `json:"competitors"`
 	Subjects            []uuid.UUID `json:"subjects"`
 }
@@ -209,7 +209,7 @@ type createUpdateInfoBinding struct {
 	Site                string      `json:"site"`
 	Document            string      `json:"document"`
 	InternalContacts    string      `json:"internalContacts"`
-	TRL                 int         `json:"TRL"`
+	TRL                 int         `json:"trl"`
 	Competitors         []uuid.UUID `json:"competitors"`
 	Subjects            []string    `json:"subjects"`
 }

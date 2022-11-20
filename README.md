@@ -193,12 +193,6 @@ Request:
 }
 ```
 
-
-
-
-
-
-
 ##### event
 
 GET `/api/v1/event`:
@@ -236,7 +230,7 @@ Request:
   "site": "",
   "document": "",
   "internalContacts": "",
-  "TRL": "",
+  "trl": 0,
   "competitors": [
     "id0",
     "id1",
@@ -268,7 +262,7 @@ Response:
   "site": "",
   "document": "",
   "internalContacts": "",
-  "TRL": "",
+  "trl": 5,
   "competitors": [
     "id0",
     "id1",
@@ -304,7 +298,7 @@ Response:
   "site": "",
   "document": "",
   "internalContacts": "",
-  "TRL": "",
+  "trl": 10,
   "competitors": [
     "id0",
     "id1",
@@ -319,29 +313,29 @@ Response:
 ```
 
 
-GET `api/v1/event/minimal`:
+GET `api/v1/minimal_event/`:
 
 Returns all events in minimal version
 
 ```json
 [
-  {"ID": "", "title": "", "organizer": "", "submissionDeadline": "", "trl": 0},
-  {"ID": "", "title": "", "organizer": "", "submissionDeadline": "", "trl": 0},
-  {"ID": "", "title": "", "organizer": "", "submissionDeadline": "", "trl":  0},
-  {"ID": "", "title": "", "organizer": "", "submissionDeadline": "", "trl":  0},
-  {"ID": "", "title": "", "organizer": "", "submissionDeadline": "", "trl":  0},
-  {"ID": "", "title": "", "organizer": "", "submissionDeadline": "", "trl":  0},
-  {"ID": "", "title": "", "organizer": "", "submissionDeadline": "", "trl":  0}
+  {"id": "", "title": "", "organizer": "", "submissionDeadline": "", "trl": 0},
+  {"id": "", "title": "", "organizer": "", "submissionDeadline": "", "trl": 0},
+  {"id": "", "title": "", "organizer": "", "submissionDeadline": "", "trl":  0},
+  {"id": "", "title": "", "organizer": "", "submissionDeadline": "", "trl":  0},
+  {"id": "", "title": "", "organizer": "", "submissionDeadline": "", "trl":  0},
+  {"id": "", "title": "", "organizer": "", "submissionDeadline": "", "trl":  0},
+  {"id": "", "title": "", "organizer": "", "submissionDeadline": "", "trl":  0}
 ]
 ```
 
-GET `api/v1/event/{id}/minimal`:
+GET `api/v1/minimal_event/{id}/`:
 
 Returns a minimal info about event with ID = id
 
 Response:
 ```json
-{"ID": "", "title": "", "organizer": "", "submissionDeadline": "", "trl": 0},
+{"id": "", "title": "", "organizer": "", "submissionDeadline": "", "trl": 0},
 ```
 
 POST `api/v1/event/{id}`:
@@ -365,7 +359,7 @@ Request:
   "site": "",
   "document": "",
   "internalContacts": "",
-  "TRL": "",
+  "trl": 5,
   "competitors": [
     "id0",
     "id1",
@@ -381,4 +375,81 @@ Request:
 
 DELETE `api/v1/event/{id}`
 
-Delets the event with id
+Deletes the event with id
+
+POST `api/v1/event/{id}`:
+
+Updates info about event and returns a new value
+
+Request:
+```json
+{
+  "title": "",
+  "organizer": "",
+  "foundingType": "",
+  "foundingRangeLow": 0,
+  "foundingRangeHigh": 15,
+  "coFoundingRangeLow": 0,
+  "coFoundingRangeHigh": 15,
+  "submissionDeadline": "YYYY-MM-DD",
+  "considerationPeriod": "",
+  "realisationPeriod": "",
+  "result": "",
+  "site": "",
+  "document": "",
+  "internalContacts": "",
+  "trl": 0,
+  "competitors": [
+    "id0",
+    "id1",
+    "id2"
+  ],
+  "subjects": [
+    "subject_1",
+    "subject_2",
+    "subject_3"
+  ]
+}
+```
+
+Response:
+```json
+{
+  "id": "",
+  "title": "",
+  "organizer": "",
+  "foundingType": "",
+  "foundingRangeLow": 0,
+  "foundingRangeHigh": 15,
+  "coFoundingRangeLow": 0,
+  "coFoundingRangeHigh": 15,
+  "submissionDeadline": "YYYY-MM-DD",
+  "considerationPeriod": "",
+  "realisationPeriod": "",
+  "result": "",
+  "site": "",
+  "document": "",
+  "internalContacts": "",
+  "trl": 10,
+  "competitors": [
+    "id0",
+    "id1",
+    "id2"
+  ],
+  "subjects": [
+    "subject_1",
+    "subject_2",
+    "subject_3"
+  ]
+}
+```
+
+##### image
+
+GET `api/v1/image/:link`:
+
+Returns an image(base64) by that link
+
+POST `api/v1/image:link`:
+
+Upload an image in base64 to that link
