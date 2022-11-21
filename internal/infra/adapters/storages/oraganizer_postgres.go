@@ -131,7 +131,14 @@ func (s PostgresOrganizerStorage) GetLevels(ctx context.Context) ([]models.Organ
 			return nil, errors.New("failed to read fetched values")
 		}
 
-		id := values[0].(uuid.UUID)
+		idInBytes := values[0].([16]byte)
+
+		id, err := uuid.FromBytes(idInBytes[:])
+		if err != nil {
+			log.Println(err)
+			return nil, errors.New("failed to read parse id from database")
+		}
+
 		name := values[1].(string)
 		code := values[2].(string)
 		levels = append(levels, models.OrganizerLevel{ID: id, Name: name, Code: code})
