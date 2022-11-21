@@ -6,14 +6,13 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 
 	"github.com/indigowar/map-of-events/internal/domain/services"
 )
 
 func UploadHandler(svc services.ImageService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		link := c.Param("link")
-
 		image, err := ioutil.ReadAll(c.Request.Body)
 		if err != nil {
 			log.Println(err)
@@ -21,7 +20,7 @@ func UploadHandler(svc services.ImageService) gin.HandlerFunc {
 			return
 		}
 
-		result, err := svc.Create(c, link, image)
+		result, err := svc.Create(c, uuid.New().String(), image)
 
 		c.JSON(http.StatusCreated, gin.H{
 			"link": result.Link,
