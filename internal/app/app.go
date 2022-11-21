@@ -17,6 +17,7 @@ import (
 	"github.com/indigowar/map-of-events/internal/infra/adapters/storages"
 	"github.com/indigowar/map-of-events/internal/infra/ports/delivery/http/v1/files"
 	"github.com/indigowar/map-of-events/internal/infra/ports/delivery/http/v1/json"
+	json2 "github.com/indigowar/map-of-events/internal/infra/ports/delivery/http/v2/json"
 	"github.com/indigowar/map-of-events/internal/services"
 )
 
@@ -87,6 +88,13 @@ func Run(cfg *config.Config) {
 
 		v1.POST("/image/:link", files.UploadHandler(imageService))
 		v1.GET("/image/:link", files.RetrievingHandler(imageService))
+	}
+
+	v2 := r.Group("/api/v2")
+	{
+		v2.GET("/organizer", json2.GetAllOrganizersHandler(organizerService, imageService))
+		v2.POST("/organizer", json2.CreateOrganizerHandler(organizerService, imageService))
+		v2.GET("/organizer/:id", json2.GetOrganizerByID(organizerService, imageService))
 	}
 
 	server := &http.Server{
