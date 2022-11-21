@@ -35,7 +35,7 @@ func (svc imageService) Create(ctx context.Context, link string, image []byte) (
 		return models.StoredImage{}, errors.New("failed to add image")
 	}
 
-	return svc.Get(ctx, link)
+	return model, nil
 }
 
 func (svc imageService) Delete(ctx context.Context, link string) error {
