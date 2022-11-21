@@ -86,8 +86,8 @@ func Run(cfg *config.Config) {
 		v1.GET("/minimal_event/", json.GetAllAsMinimalHandler(eventService))
 		v1.GET("/minimal_event/:id", json.GetByIDAsMinimalHandler(eventService))
 
-		v1.POST("/image/:link", files.UploadHandler(imageService))
-		v1.GET("/image/", files.RetrievingHandler(imageService))
+		v1.POST("/image/", files.UploadHandler(imageService))
+		v1.GET("/image/:link", files.RetrievingHandler(imageService))
 	}
 
 	v2 := r.Group("/api/v2")
