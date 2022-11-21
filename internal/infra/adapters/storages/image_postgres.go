@@ -20,7 +20,7 @@ type PostgresImageStorage struct {
 func (s PostgresImageStorage) Get(ctx context.Context, link string) (models.StoredImage, error) {
 	query := fmt.Sprintf("SELECT * FROM images WHERE link = '%s'", link)
 	var image models.StoredImage
-	err := s.pool.QueryRow(ctx, query).Scan()
+	err := s.pool.QueryRow(ctx, query).Scan(&image.Link, &image.Value)
 	if err != nil {
 		log.Println(err)
 		return models.StoredImage{}, errors.New("failed to find image")
