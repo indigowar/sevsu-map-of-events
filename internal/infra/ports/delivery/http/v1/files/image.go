@@ -6,9 +6,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 
 	"github.com/indigowar/map-of-events/internal/domain/services"
+	"github.com/indigowar/map-of-events/pkg/random"
 )
 
 func UploadHandler(svc services.ImageService) gin.HandlerFunc {
@@ -20,7 +20,7 @@ func UploadHandler(svc services.ImageService) gin.HandlerFunc {
 			return
 		}
 
-		result, err := svc.Create(c, uuid.New().String(), image)
+		result, err := svc.Create(c, random.RandStringRunes(10), image)
 
 		c.JSON(http.StatusCreated, gin.H{
 			"link": result.Link,
