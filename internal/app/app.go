@@ -15,8 +15,8 @@ import (
 
 	"github.com/indigowar/map-of-events/internal/config"
 	"github.com/indigowar/map-of-events/internal/infra/adapters/storages"
-	"github.com/indigowar/map-of-events/internal/infra/ports/delivery/http/files"
-	json2 "github.com/indigowar/map-of-events/internal/infra/ports/delivery/http/json"
+	"github.com/indigowar/map-of-events/internal/infra/ports/delivery/http/v1/files"
+	"github.com/indigowar/map-of-events/internal/infra/ports/delivery/http/v1/json"
 	"github.com/indigowar/map-of-events/internal/services"
 )
 
@@ -58,32 +58,32 @@ func Run(cfg *config.Config) {
 
 	v1 := r.Group("api/v1")
 	{
-		v1.GET("/competitor", json2.GetAllCompetitorsHandler(competitorService))
-		v1.POST("/competitor", json2.CreateCompetitorHandler(competitorService))
+		v1.GET("/competitor", json.GetAllCompetitorsHandler(competitorService))
+		v1.POST("/competitor", json.CreateCompetitorHandler(competitorService))
 
-		v1.GET("/founding_range/:id", json2.GetByIDRangeHandler(foundingService))
-		v1.GET("/founding_range", json2.GetMaximumRangeHandler(foundingService))
+		v1.GET("/founding_range/:id", json.GetByIDRangeHandler(foundingService))
+		v1.GET("/founding_range", json.GetMaximumRangeHandler(foundingService))
 
-		v1.GET("/co_founding_range/:id", json2.GetByIDRangeHandler(coFoundingService))
-		v1.GET("/co_founding_range", json2.GetMaximumRangeHandler(coFoundingService))
+		v1.GET("/co_founding_range/:id", json.GetByIDRangeHandler(coFoundingService))
+		v1.GET("/co_founding_range", json.GetMaximumRangeHandler(coFoundingService))
 
-		v1.GET("/organizer_level", json2.GetAllOrganizerLevelsHandler(organizerService))
-		v1.POST("/organizer_level", json2.CreateOrganizerLevelHandler(organizerService))
+		v1.GET("/organizer_level", json.GetAllOrganizerLevelsHandler(organizerService))
+		v1.POST("/organizer_level", json.CreateOrganizerLevelHandler(organizerService))
 
-		v1.GET("/organizer/", json2.GetAllOrganizersHandler(organizerService))
-		v1.POST("/organizer/", json2.CreateOrganizerHandler(organizerService))
-		v1.GET("/organizer/:id", json2.GetByIDOrganizerHandler(organizerService))
-		v1.POST("/organizer/:id", json2.UpdateOrganizerHandler(organizerService)) // TODO: implement
+		v1.GET("/organizer/", json.GetAllOrganizersHandler(organizerService))
+		v1.POST("/organizer/", json.CreateOrganizerHandler(organizerService))
+		v1.GET("/organizer/:id", json.GetByIDOrganizerHandler(organizerService))
+		v1.POST("/organizer/:id", json.UpdateOrganizerHandler(organizerService)) // TODO: implement
 
-		v1.GET("/event/", json2.GetAllEventHandler(eventService))
-		v1.POST("/event/", json2.CreateEventHandler(eventService))
+		v1.GET("/event/", json.GetAllEventHandler(eventService))
+		v1.POST("/event/", json.CreateEventHandler(eventService))
 
-		v1.GET("/event/:id/", json2.GetByIDEventHandler(eventService))
-		v1.DELETE("/event/:id", json2.DeleteEventHandler(eventService))
-		v1.POST("/event/:id", json2.UpdateEventHandler(eventService)) // TODO: implement
+		v1.GET("/event/:id/", json.GetByIDEventHandler(eventService))
+		v1.DELETE("/event/:id", json.DeleteEventHandler(eventService))
+		v1.POST("/event/:id", json.UpdateEventHandler(eventService)) // TODO: implement
 
-		v1.GET("/minimal_event/", json2.GetAllAsMinimalHandler(eventService))
-		v1.GET("/minimal_event/:id", json2.GetByIDAsMinimalHandler(eventService))
+		v1.GET("/minimal_event/", json.GetAllAsMinimalHandler(eventService))
+		v1.GET("/minimal_event/:id", json.GetByIDAsMinimalHandler(eventService))
 
 		v1.POST("/image/:link", files.UploadHandler(imageService))
 		v1.GET("/image/:link", files.RetrievingHandler(imageService))
