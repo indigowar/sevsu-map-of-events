@@ -14,13 +14,13 @@ import (
 type organizerBinding struct {
 	Id    uuid.UUID `json:"id"`
 	Name  string    `json:"name"`
-	Image string    `json:"image"`
+	Logo  string    `json:"logo"`
 	Level uuid.UUID `json:"level"`
 }
 
 type createOrganizerInfo struct {
 	Name  string    `json:"name"`
-	Image string    `json:"image"`
+	Logo  string    `json:"logo"`
 	Level uuid.UUID `json:"level"`
 }
 
@@ -40,7 +40,7 @@ func GetAllOrganizersHandler(organizerSvc services.OrganizerService, imageSvc se
 				log.Println(err)
 				continue
 			}
-			result[i].Image = string(image.Value)
+			result[i].Logo = string(image.Value)
 		}
 
 		c.JSON(http.StatusOK, result)
@@ -74,7 +74,7 @@ func GetOrganizerByID(organizerSvc services.OrganizerService, imageSvc services.
 			c.JSON(http.StatusOK, result)
 			return
 		}
-		result.Image = string(image.Value[:])
+		result.Logo = string(image.Value[:])
 
 		c.JSON(http.StatusOK, result)
 	}
@@ -91,7 +91,7 @@ func CreateOrganizerHandler(orgSvc services.OrganizerService, imgSvc services.Im
 
 		logo := random.RandStringRunes(10)
 
-		image, err := imgSvc.Create(c, logo, []byte(info.Image))
+		image, err := imgSvc.Create(c, logo, []byte(info.Logo))
 		if err != nil {
 			log.Println(err)
 			c.Status(http.StatusInternalServerError)
@@ -108,7 +108,7 @@ func CreateOrganizerHandler(orgSvc services.OrganizerService, imgSvc services.Im
 		c.JSON(http.StatusCreated, organizerBinding{
 			Id:    organizer.ID,
 			Name:  organizer.Name,
-			Image: string(image.Value[:]),
+			Logo:  string(image.Value[:]),
 			Level: organizer.Level,
 		})
 	}
