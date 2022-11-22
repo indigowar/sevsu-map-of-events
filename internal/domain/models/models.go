@@ -51,11 +51,6 @@ type Event struct {
 	Competitors         []uuid.UUID
 }
 
-func (e Event) Error() string {
-	//TODO implement me
-	panic("implement me")
-}
-
 type Subject struct {
 	ID      uuid.UUID
 	Name    string

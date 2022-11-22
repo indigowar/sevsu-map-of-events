@@ -10,6 +10,7 @@ import (
 	"github.com/indigowar/map-of-events/internal/domain/models"
 	"github.com/indigowar/map-of-events/internal/domain/repos/adapters/storages"
 	"github.com/indigowar/map-of-events/internal/domain/services"
+	"github.com/indigowar/map-of-events/internal/domain/validators"
 )
 
 type eventService struct {
@@ -51,7 +52,63 @@ func (svc eventService) GetByID(ctx context.Context, id uuid.UUID) (models.Event
 	return event, nil
 }
 
+func (svc eventService) validateCreationInfo(ctx context.Context, info services.EventCreateInfo) error {
+	// The organizer should already exist
+	// in the moment of creation it's event
+	{
+		existedOrganizers, err := svc.organizer.GetAllIDs(ctx)
+		if err != nil {
+			log.Println(err)
+			return errors.New("internal error")
+		}
+		if !validators.IDExists(existedOrganizers, info.Organizer) {
+			return errors.New("organizer does not exist")
+		}
+	}
+
+	// Validate that both Founding Range and CoFoundingRange are valid
+	{
+		if err := validators.ValidateRange(models.RangeModel{Low: info.FoundingRangeLow, High: info.FoundingRangeHigh}); err != nil {
+			return err
+		}
+
+		if err := validators.ValidatePercentRange(models.RangeModel{Low: info.CoFoundingRangeLow, High: info.CoFoundingRangeHigh}); err != nil {
+			return err
+		}
+	}
+
+	// Validate TRL
+	// TRL should be between 0 and 9
+	{
+		if info.TRL <= 0 || info.TRL >= 10 {
+			return errors.New("invalid trl")
+		}
+	}
+
+	// All of used in this event
+	// should already exist
+	{
+		competitors, err := svc.competitors.AllIDs(ctx)
+		if err != nil {
+			log.Println(err)
+			return errors.New("internal error")
+		}
+
+		for _, competitor := range info.Competitors {
+			if !validators.IDExists(competitors, competitor) {
+				return errors.New("competitor does not exist")
+			}
+		}
+	}
+
+	return nil
+}
+
 func (svc eventService) Create(ctx context.Context, info services.EventCreateInfo) (models.Event, error) {
+	if err := svc.validateCreationInfo(ctx, info); err != nil {
+		return models.Event{}, err
+	}
+
 	tx, err := svc.eventStorage.InvokeTransactionMechanism(ctx)
 	if err != nil {
 		log.Println(err)
@@ -60,14 +117,7 @@ func (svc eventService) Create(ctx context.Context, info services.EventCreateInf
 		_ = eventStorage.ShadowTransactionMechanism(ctx, transaction)
 	}(svc.eventStorage, ctx, tx)
 
-	eventId := uuid.New()
-
 	serviceCtx := context.WithValue(ctx, "connection", tx)
-
-	if _, err := svc.organizer.GetByID(serviceCtx, info.Organizer); err != nil {
-		log.Println(err)
-		return models.Event{}, errors.New("not found - organizer")
-	}
 
 	founding, err := svc.foundingRanges.Create(serviceCtx, info.FoundingRangeLow, info.FoundingRangeHigh)
 	if err != nil {
@@ -80,8 +130,7 @@ func (svc eventService) Create(ctx context.Context, info services.EventCreateInf
 		return models.Event{}, errors.New("failed to create - co founding range")
 	}
 
-	subjects := make([]uuid.UUID, 0)
-
+	eventId := uuid.New()
 	event := models.Event{
 		ID:                  eventId,
 		Title:               info.Title,
@@ -99,16 +148,17 @@ func (svc eventService) Create(ctx context.Context, info services.EventCreateInf
 		TRL:                 info.TRL,
 		Competitors:         info.Competitors,
 	}
+
 	if err := svc.eventStorage.Create(serviceCtx, event); err != nil {
 		log.Println(err)
 		return models.Event{}, errors.New("failed to create - event")
 	}
 
-	for _, v := range info.Subjects {
+	subjects := make([]uuid.UUID, len(info.Subjects))
+	for i, v := range info.Subjects {
 		s, _ := svc.subjects.Create(serviceCtx, eventId, v)
-		subjects = append(subjects, s.ID)
+		subjects[i] = s.ID
 	}
-
 	return event, nil
 }
 
