@@ -14,7 +14,7 @@ import (
 type organizerBinding struct {
 	Id    uuid.UUID `json:"id"`
 	Name  string    `json:"name"`
-	Image string    `json:"image,omitempty"`
+	Image string    `json:"image"`
 	Level uuid.UUID `json:"level"`
 }
 
