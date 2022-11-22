@@ -241,8 +241,65 @@ func (svc eventService) GetByIDAsMinimal(ctx context.Context, id uuid.UUID) (ser
 	}, nil
 }
 
-func (svc eventService) Update(_ context.Context, _ uuid.UUID, _ services.EventCreateInfo) (models.Event, error) {
-	panic("not implemented")
+func (svc eventService) updateEventModel(e models.Event, i services.EventCreateInfo) models.Event {
+	e.Title = i.Title
+	e.Organizer = i.Organizer
+	e.SubmissionDeadline = i.SubmissionDeadline
+	e.ConsiderationPeriod = i.ConsiderationPeriod
+	e.RealisationPeriod = i.RealisationPeriod
+	e.Result = i.Result
+	e.Site = i.Site
+	e.Document = i.Document
+	e.InternalContacts = i.InternalContacts
+	e.TRL = i.TRL
+	e.Competitors = i.Competitors
+	return e
+}
+
+func (svc eventService) Update(ctx context.Context, id uuid.UUID, info services.EventCreateInfo) (models.Event, error) {
+	storedEvent, err := svc.GetByID(ctx, id)
+	if err != nil {
+		log.Println(err)
+		return models.Event{}, errors.New("event was not found")
+	}
+
+	if err := svc.validateCreationInfo(ctx, info); err != nil {
+		log.Println(err)
+		return models.Event{}, err
+	}
+
+	tx, err := svc.eventStorage.InvokeTransactionMechanism(ctx)
+	if err != nil {
+		log.Println(err)
+	}
+	defer func(eventStorage storages.EventStorageRepository, ctx context.Context, transaction interface{}) {
+		_ = eventStorage.ShadowTransactionMechanism(ctx, transaction)
+	}(svc.eventStorage, ctx, tx)
+
+	serviceCtx := context.WithValue(ctx, "connection", tx)
+
+	storedEvent = svc.updateEventModel(storedEvent, info)
+
+	if err := svc.eventStorage.Update(serviceCtx, storedEvent); err != nil {
+		log.Println(err)
+		return models.Event{}, errors.New("failed to update event")
+	}
+
+	foundingRange := models.FoundingRange{ID: storedEvent.FoundingRange, Low: info.FoundingRangeLow, High: info.FoundingRangeHigh}
+	if _, err := svc.foundingRanges.Update(ctx, foundingRange); err != nil {
+		log.Println(err)
+		return models.Event{}, errors.New("failed to update founding range")
+	}
+
+	coFoundingRange := models.FoundingRange{ID: storedEvent.FoundingRange, Low: info.CoFoundingRangeLow, High: info.CoFoundingRangeHigh}
+	if _, err := svc.coFoundingRanges.Update(ctx, coFoundingRange); err != nil {
+		log.Println(err)
+		return models.Event{}, errors.New("failed to update co-founding range")
+	}
+
+	// TODO: add here update of subjects
+
+	return storedEvent, nil
 }
 
 func NewEventServices(storage storages.EventStorageRepository,
