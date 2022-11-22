@@ -67,10 +67,16 @@ func (s PostgresOrganizerStorage) GetAll(ctx context.Context) ([]models.Organize
 			log.Println(err)
 			return nil, errors.New("failed to read fetched values")
 		}
-		id := values[0].(uuid.UUID)
+		parsedId := values[0].([16]byte)
+		id, err := uuid.FromBytes(parsedId[:])
+		if err != nil {
+			log.Println(err)
+			return nil, errors.New("failed to parse id")
+		}
 		name := values[1].(string)
 		logo := values[2].(string)
-		level := values[3].(uuid.UUID)
+		byteLevel := values[3].([16]byte)
+		level, _ := uuid.FromBytes(byteLevel[:])
 
 		organizers = append(organizers, models.Organizer{ID: id, Name: name, Logo: logo, Level: level})
 	}
