@@ -9,6 +9,7 @@ import (
 )
 
 type CompetitorService interface {
+	AllIDs(ctx context.Context) ([]uuid.UUID, error)
 	GetByID(ctx context.Context, id uuid.UUID) (models.Competitor, error)
 	GetAll(ctx context.Context) ([]models.Competitor, error)
 	Create(ctx context.Context, name string) (models.Competitor, error)

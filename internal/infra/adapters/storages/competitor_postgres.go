@@ -18,6 +18,36 @@ type PostgresCompetitorStorage struct {
 	pool *pgxpool.Pool
 }
 
+func (s PostgresCompetitorStorage) AllIDs(ctx context.Context) ([]uuid.UUID, error) {
+	query := "SELECT competitor_id FROM competitor"
+
+	result := make([]uuid.UUID, 0)
+
+	rows, err := s.pool.Query(ctx, query)
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("failed to read the database")
+	}
+
+	for rows.Next() {
+		values, err := rows.Values()
+		if err != nil {
+			log.Println(err)
+			return nil, errors.New("failed to read values from db")
+		}
+		byteId := values[0].([16]byte)
+		id, err := uuid.FromBytes(byteId[:])
+		if err != nil {
+			log.Println(err)
+			return nil, errors.New("failed to parse id")
+		}
+		result = append(result, id)
+	}
+
+	return result, nil
+}
+
 func (s PostgresCompetitorStorage) Get(ctx context.Context, id uuid.UUID) (models.Competitor, error) {
 	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
 
