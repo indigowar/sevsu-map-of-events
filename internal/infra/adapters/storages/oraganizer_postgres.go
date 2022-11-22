@@ -18,6 +18,60 @@ type PostgresOrganizerStorage struct {
 	pool *pgxpool.Pool
 }
 
+func (s PostgresOrganizerStorage) GetAllIDs(ctx context.Context) ([]uuid.UUID, error) {
+	ids := make([]uuid.UUID, 0)
+
+	rows, err := s.pool.Query(ctx, "SELECT organizer_id FROM organizer")
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("failed to read database")
+	}
+
+	for rows.Next() {
+		values, err := rows.Values()
+		if err != nil {
+			log.Println(err)
+			return nil, errors.New("failed to read fetched values")
+		}
+		parsedId := values[0].([16]byte)
+		id, err := uuid.FromBytes(parsedId[:])
+		if err != nil {
+			log.Println(err)
+			return nil, errors.New("failed to parse id")
+		}
+		ids = append(ids, id)
+	}
+
+	return ids, nil
+}
+
+func (s PostgresOrganizerStorage) GetLevelsIDs(ctx context.Context) ([]uuid.UUID, error) {
+	ids := make([]uuid.UUID, 0)
+
+	rows, err := s.pool.Query(ctx, "SELECT organizer_level_id FROM organizer_level")
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("failed to read database")
+	}
+
+	for rows.Next() {
+		values, err := rows.Values()
+		if err != nil {
+			log.Println(err)
+			return nil, errors.New("failed to read fetched values")
+		}
+		parsedId := values[0].([16]byte)
+		id, err := uuid.FromBytes(parsedId[:])
+		if err != nil {
+			log.Println(err)
+			return nil, errors.New("failed to parse id")
+		}
+		ids = append(ids, id)
+	}
+
+	return ids, nil
+}
+
 func (s PostgresOrganizerStorage) InvokeTransactionMechanism(ctx context.Context) (interface{}, error) {
 	return s.pool.Begin(ctx)
 }

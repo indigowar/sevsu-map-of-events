@@ -16,6 +16,14 @@ type organizerSvc struct {
 	storage storages.OrganizerStorageRepository
 }
 
+func (o organizerSvc) GetAllIDs(ctx context.Context) ([]uuid.UUID, error) {
+	return o.storage.GetAllIDs(ctx)
+}
+
+func (o organizerSvc) GetAllLevelsId(ctx context.Context) ([]uuid.UUID, error) {
+	return o.storage.GetLevelsIDs(ctx)
+}
+
 func (o organizerSvc) GetAll(ctx context.Context) ([]models.Organizer, error) {
 	return o.storage.GetAll(ctx)
 }
