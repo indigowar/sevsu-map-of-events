@@ -44,14 +44,14 @@ func Run(cfg *config.Config) {
 	eventStorage := storages.NewPostgresEventStorage(postgresCPool)
 	imageStorage := storages.NewPostgresImageStorage(postgresCPool)
 
+	imageService := services.NewImageService(imageStorage)
+
 	competitorService := services.NewCompetitorService(competitorStorage)
-	organizerService, _ := services.NewOrganizerService(organizerStorage)
+	organizerService, _ := services.NewOrganizerService(organizerStorage, imageService)
 	foundingService := services.NewFoundingRangeService(foundingRangeStorage)
 	coFoundingService := services.NewCoFoundingRangeService(coFoundingRangeStorage)
 	subjectService := services.NewSubjectService(subjectStorage)
 	eventService := services.NewEventServices(eventStorage, subjectService, organizerService, foundingService, coFoundingService, competitorService)
-
-	imageService := services.NewImageService(imageStorage)
 
 	r := gin.Default()
 
