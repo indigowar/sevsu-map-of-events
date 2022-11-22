@@ -36,10 +36,13 @@ POST `/api/v1/competitor_type`:
 Creates a new competitor type
 
 Request:
+
 ```json
 "Competitor Name"
 ```
+
 Response:
+
 ```json
 {
   "id": "4wr432r3-52423423",
@@ -48,11 +51,13 @@ Response:
 ```
 
 ##### founding_range
+
 GET `/api/v1/founding_range`:
 
 Returns a maximal available range.
 
 Response:
+
 ```json
 {
   "id": "unused",
@@ -66,6 +71,7 @@ GET `/api/v1/founding_range/{id}`:
 Returns a value of range with id = id
 
 Response:
+
 ```json
 {
   "id": "id",
@@ -75,21 +81,44 @@ Response:
 ```
 
 ##### co_founding_range
+
 Same as founding_range
 
 ##### organizer_level
+
 GET `api/v1/organizer_level`:
 
 Returns a list of all organizer levels that exists.
 
 Response:
+
 ```json
 [
-  {"id": "adadad", "name":  "name level", "code":  "FDD"},
-  {"id": "adadad", "name":  "name level", "code":  "FDD"},
-  {"id": "adadad", "name":  "name level", "code":  "FDD"},
-  {"id": "adadad", "name":  "name level", "code":  "FDD"},
-  {"id": "adadad", "name":  "name level", "code":  "FDD"}
+  {
+    "id": "adadad",
+    "name": "name level",
+    "code": "FDD"
+  },
+  {
+    "id": "adadad",
+    "name": "name level",
+    "code": "FDD"
+  },
+  {
+    "id": "adadad",
+    "name": "name level",
+    "code": "FDD"
+  },
+  {
+    "id": "adadad",
+    "name": "name level",
+    "code": "FDD"
+  },
+  {
+    "id": "adadad",
+    "name": "name level",
+    "code": "FDD"
+  }
 ]
 ```
 
@@ -98,13 +127,16 @@ POST `api/v1/organizer_level`:
 Creates an organizer level and returns it.
 
 Request:
+
 ```json
 {
   "name": "sfadsad",
   "code": "xxx"
 }
 ```
+
 Response:
+
 ```json
 {
   "id": "ad12fdb34dedf",
@@ -113,13 +145,14 @@ Response:
 }
 ```
 
-######  organizer
+###### organizer
 
 GET `api/v1/organizer/`:
 
 Returns all organizers that does exist.
 
 Response:
+
 ```json
 [
   {
@@ -148,6 +181,7 @@ POST `api/v1/organizer/`
 Creates a new organizer and returns it.
 
 Request:
+
 ```json
 {
   "name": "organizer Name",
@@ -157,9 +191,10 @@ Request:
 ```
 
 Response:
+
 ```json
 {
-  "id":"dsffafbc-gdgffd",
+  "id": "dsffafbc-gdgffd",
   "name": "organizer Name",
   "logo": "Organizer logo",
   "level": "fgdsfsdfd"
@@ -171,9 +206,10 @@ GET `api/v1/organizer/{id}`:
 Returns organizer with ID = id
 
 Response:
+
 ```json
 {
-  "id":"id",
+  "id": "id",
   "name": "organizer Name",
   "logo": "Organizer logo",
   "level": "fgdsfsdfd"
@@ -185,6 +221,7 @@ POST `api/v1/organizer/{id}`:
 Updates organizer with ID = id
 
 Request:
+
 ```json
 {
   "name": "organizer Name",
@@ -200,6 +237,7 @@ GET `/api/v1/event`:
 Returns all current
 
 Response:
+
 ```json
 [
   "234fdg0d43fd",
@@ -214,6 +252,7 @@ POST `api/v1/event`:
 Create event and return it.
 
 Request:
+
 ```json
 {
   "title": "",
@@ -245,6 +284,7 @@ Request:
 ```
 
 Response:
+
 ```json
 {
   "id": "",
@@ -281,6 +321,7 @@ GET `api/v1/event/{id}`:
 Returns event info with ID = id
 
 Response:
+
 ```json
 {
   "id": "",
@@ -312,20 +353,61 @@ Response:
 }
 ```
 
-
 GET `api/v1/minimal_event/`:
 
 Returns all events in minimal version
 
 ```json
 [
-  {"id": "", "title": "", "organizer": "", "submissionDeadline": "", "trl": 0},
-  {"id": "", "title": "", "organizer": "", "submissionDeadline": "", "trl": 0},
-  {"id": "", "title": "", "organizer": "", "submissionDeadline": "", "trl":  0},
-  {"id": "", "title": "", "organizer": "", "submissionDeadline": "", "trl":  0},
-  {"id": "", "title": "", "organizer": "", "submissionDeadline": "", "trl":  0},
-  {"id": "", "title": "", "organizer": "", "submissionDeadline": "", "trl":  0},
-  {"id": "", "title": "", "organizer": "", "submissionDeadline": "", "trl":  0}
+  {
+    "id": "",
+    "title": "",
+    "organizer": "",
+    "submissionDeadline": "",
+    "trl": 0
+  },
+  {
+    "id": "",
+    "title": "",
+    "organizer": "",
+    "submissionDeadline": "",
+    "trl": 0
+  },
+  {
+    "id": "",
+    "title": "",
+    "organizer": "",
+    "submissionDeadline": "",
+    "trl": 0
+  },
+  {
+    "id": "",
+    "title": "",
+    "organizer": "",
+    "submissionDeadline": "",
+    "trl": 0
+  },
+  {
+    "id": "",
+    "title": "",
+    "organizer": "",
+    "submissionDeadline": "",
+    "trl": 0
+  },
+  {
+    "id": "",
+    "title": "",
+    "organizer": "",
+    "submissionDeadline": "",
+    "trl": 0
+  },
+  {
+    "id": "",
+    "title": "",
+    "organizer": "",
+    "submissionDeadline": "",
+    "trl": 0
+  }
 ]
 ```
 
@@ -334,8 +416,15 @@ GET `api/v1/minimal_event/{id}/`:
 Returns a minimal info about event with ID = id
 
 Response:
+
 ```json
-{"id": "", "title": "", "organizer": "", "submissionDeadline": "", "trl": 0},
+{
+  "id": "",
+  "title": "",
+  "organizer": "",
+  "submissionDeadline": "",
+  "trl": 0
+},
 ```
 
 POST `api/v1/event/{id}`:
@@ -343,6 +432,7 @@ POST `api/v1/event/{id}`:
 Updates event with ID = id
 
 Request:
+
 ```json
 {
   "title": "",
@@ -382,6 +472,7 @@ POST `api/v1/event/{id}`:
 Updates info about event and returns a new value
 
 Request:
+
 ```json
 {
   "title": "",
@@ -413,6 +504,7 @@ Request:
 ```
 
 Response:
+
 ```json
 {
   "id": "",
@@ -450,6 +542,77 @@ GET `api/v1/image/:link`:
 
 Returns an image(base64) by that link
 
-POST `api/v1/image:link`:
+POST `api/v1/image/`:
 
-Upload an image in base64 to that link
+Upload an image in base64, will return a link of it.
+
+#### v2
+
+##### organizer
+
+GET to `apiv2/organizer`:
+
+Get all organizers with nested images
+
+Request:
+
+```json
+[
+  {
+    "id": "adadsad",
+    "name": "OrganizerName",
+    "logo": "data:/big-big-image",
+    "level": "dbggds-2gfvdffdgv-fdfd"
+  },
+  {
+    "id": "adadsad",
+    "name": "OrganizerName",
+    "logo": "data:/big-big-image",
+    "level": "dbggds-2gfvdffdgv-fdfd"
+  },
+  {
+    "id": "adadsad",
+    "name": "OrganizerName",
+    "logo": "data:/big-big-image",
+    "level": "dbggds-2gfvdffdgv-fdfd"
+  }
+]
+```
+
+POST to `api/v2/organizer`:
+
+Request:
+
+```json
+{
+  "name": "OrganizerName",
+  "logo": "data:/big-big-image",
+  "level": "dbggds-2gfvdffdgv-fdfd"
+}
+```
+
+Response:
+
+```json
+{
+  "id": "adadsad",
+  "name": "OrganizerName",
+  "logo": "data:/big-big-image",
+  "level": "dbggds-2gfvdffdgv-fdfd"
+}
+```
+
+GET `api/v2/organizer/{id}`
+
+Get organizer info with nested image
+
+Response:
+
+```json
+{
+  "id": "adadsad",
+  "name": "OrganizerName",
+  "logo": "data:/big-big-image",
+  "level": "dbggds-2gfvdffdgv-fdfd"
+}
+```
