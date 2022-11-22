@@ -230,6 +230,16 @@ Request:
 }
 ```
 
+Response:
+```json
+{
+  "id": "dsffafbc-gdgffd",
+  "name": "organizer Name",
+  "logo": "Organizer logo",
+  "level": "fgdsfsdfd"
+}
+```
+
 ##### event
 
 GET `/api/v1/event`:

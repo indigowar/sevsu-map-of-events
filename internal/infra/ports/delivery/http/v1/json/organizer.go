@@ -139,26 +139,36 @@ func CreateOrganizerHandler(svc services.OrganizerService) func(c *gin.Context) 
 	}
 }
 
-func UpdateOrganizerHandler(_ services.OrganizerService) func(c *gin.Context) {
+func UpdateOrganizerHandler(svc services.OrganizerService) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		stringId := c.Param("id")
-
-		_, err := uuid.Parse(stringId)
+		organizerId, err := uuid.Parse(stringId)
 		if err != nil {
 			log.Println(err)
 			c.Status(http.StatusBadRequest)
 			return
 		}
 
-		var input createOrganizerRequest
-		if err := c.ShouldBindJSON(&input); err != nil {
+		var info createOrganizerRequest
+
+		if err := c.ShouldBindJSON(&info); err != nil {
 			log.Println(err)
 			c.Status(http.StatusBadRequest)
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{
-			"msg": "unimplemented",
+		result, err := svc.Update(c, organizerId, info.Name, info.Logo, info.Level)
+		if err != nil {
+			log.Println(err)
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+
+		c.JSON(http.StatusOK, organizerBinding{
+			Id:    result.ID,
+			Name:  result.Name,
+			Logo:  result.Logo,
+			Level: result.Level,
 		})
 	}
 }

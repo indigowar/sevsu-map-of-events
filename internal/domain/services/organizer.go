@@ -13,6 +13,7 @@ type OrganizerService interface {
 	GetByID(ctx context.Context, id uuid.UUID) (models.Organizer, error)
 	Create(ctx context.Context, name, logo string, level uuid.UUID) (models.Organizer, error)
 	Delete(ctx context.Context, id uuid.UUID) error
+	Update(ctx context.Context, id uuid.UUID, name, logo string, level uuid.UUID) (models.Organizer, error)
 
 	GetAllLevels(ctx context.Context) ([]models.OrganizerLevel, error)
 	CreateLevel(ctx context.Context, name string, code string) (models.OrganizerLevel, error)

@@ -74,7 +74,7 @@ func Run(cfg *config.Config) {
 		v1.GET("/organizer/", json.GetAllOrganizersHandler(organizerService))
 		v1.POST("/organizer/", json.CreateOrganizerHandler(organizerService))
 		v1.GET("/organizer/:id", json.GetByIDOrganizerHandler(organizerService))
-		v1.POST("/organizer/:id", json.UpdateOrganizerHandler(organizerService)) // TODO: implement
+		v1.POST("/organizer/:id", json.UpdateOrganizerHandler(organizerService))
 
 		v1.GET("/event/", json.GetAllEventHandler(eventService))
 		v1.POST("/event/", json.CreateEventHandler(eventService))

@@ -2,6 +2,8 @@ package services
 
 import (
 	"context"
+	"errors"
+	"log"
 
 	"github.com/google/uuid"
 
@@ -53,6 +55,22 @@ func (o organizerSvc) CreateLevel(ctx context.Context, name string, code string)
 
 func (o organizerSvc) UpdateLevel(_ context.Context, _ models.OrganizerLevel) (models.OrganizerLevel, error) {
 	panic("unimplemented")
+}
+
+func (o organizerSvc) Update(ctx context.Context, id uuid.UUID, name, logo string, level uuid.UUID) (models.Organizer, error) {
+	m := models.Organizer{
+		ID:    id,
+		Name:  name,
+		Logo:  logo,
+		Level: level,
+	}
+
+	if err := o.storage.Update(ctx, m); err != nil {
+		log.Println(err)
+		return models.Organizer{}, errors.New("failed to update an organizer")
+	}
+
+	return m, nil
 }
 
 func NewOrganizerService(storage storages.OrganizerStorageRepository) (services.OrganizerService, error) {
