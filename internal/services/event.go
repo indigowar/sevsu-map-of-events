@@ -22,6 +22,10 @@ type eventService struct {
 	eventStorage storages.EventStorageRepository
 }
 
+func (svc eventService) AllIDs(ctx context.Context) ([]uuid.UUID, error) {
+	return svc.eventStorage.GetIDList(ctx)
+}
+
 func (svc eventService) GetAll(ctx context.Context) ([]models.Event, error) {
 	ids, err := svc.eventStorage.GetIDList(ctx)
 	if err != nil {

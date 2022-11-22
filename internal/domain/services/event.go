@@ -38,6 +38,7 @@ type EventCreateInfo struct {
 }
 
 type EventService interface {
+	AllIDs(ctx context.Context) ([]uuid.UUID, error)
 	GetAll(ctx context.Context) ([]models.Event, error)
 	GetByID(ctx context.Context, id uuid.UUID) (models.Event, error)
 	Create(ctx context.Context, info EventCreateInfo) (models.Event, error)
