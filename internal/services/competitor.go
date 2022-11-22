@@ -16,6 +16,10 @@ type competitorService struct {
 	storage storages.CompetitorStorage
 }
 
+func (svc competitorService) AllIDs(ctx context.Context) ([]uuid.UUID, error) {
+	return svc.AllIDs(ctx)
+}
+
 func (svc competitorService) GetByID(ctx context.Context, id uuid.UUID) (models.Competitor, error) {
 	c, err := svc.storage.Get(ctx, id)
 	if err != nil {
