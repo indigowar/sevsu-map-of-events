@@ -14,6 +14,15 @@ type imageService struct {
 	storage storages.ImageStorage
 }
 
+func (svc imageService) GetAllLinks(ctx context.Context) ([]string, error) {
+	links, err := svc.storage.GetAllLinks(ctx)
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("internal error")
+	}
+	return links, nil
+}
+
 func (svc imageService) Get(ctx context.Context, link string) (models.StoredImage, error) {
 	image, err := svc.storage.Get(ctx, link)
 	if err != nil {

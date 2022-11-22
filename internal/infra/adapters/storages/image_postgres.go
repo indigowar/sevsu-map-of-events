@@ -17,6 +17,28 @@ type PostgresImageStorage struct {
 	pool *pgxpool.Pool
 }
 
+func (s PostgresImageStorage) GetAllLinks(ctx context.Context) ([]string, error) {
+	links := make([]string, 0)
+
+	rows, err := s.pool.Query(ctx, "SELECT link FROM images")
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("failed to read database")
+	}
+
+	for rows.Next() {
+		value, err := rows.Values()
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		link := value[0].(string)
+		links = append(links, link)
+	}
+
+	return links, nil
+}
+
 func (s PostgresImageStorage) Get(ctx context.Context, link string) (models.StoredImage, error) {
 	query := fmt.Sprintf("SELECT * FROM images WHERE link = '%s'", link)
 	var image models.StoredImage
