@@ -40,7 +40,7 @@ func GetAllOrganizersHandler(organizerSvc services.OrganizerService, imageSvc se
 				log.Println(err)
 				continue
 			}
-			result[i].Logo = string(image.Value)
+			result[i].Logo = string(image.Value[:])
 		}
 
 		c.JSON(http.StatusOK, result)

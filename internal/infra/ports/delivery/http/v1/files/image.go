@@ -39,6 +39,6 @@ func RetrievingHandler(svc services.ImageService) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, m.Value)
+		c.JSON(http.StatusOK, string(m.Value[:]))
 	}
 }
