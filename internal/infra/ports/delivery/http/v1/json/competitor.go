@@ -19,20 +19,22 @@ func GetAllCompetitorsHandler(svc services.CompetitorService) func(c *gin.Contex
 	return func(c *gin.Context) {
 		comps, err := svc.GetAll(c)
 
-		switch err.Reason() {
-		case services.ErrReasonInternalError:
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"msg": err.ShortErr(),
-			})
-			break
-		default:
-			result := make([]Competitor, len(comps))
-			for i, v := range comps {
-				result[i] = Competitor{v.ID, v.Name}
+		if err != nil {
+			switch err.Reason() {
+			case services.ErrReasonInternalError:
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"msg": err.ShortErr(),
+				})
+				break
 			}
-			c.JSON(http.StatusOK, result)
-			break
+			return
 		}
+
+		result := make([]Competitor, len(comps))
+		for i, v := range comps {
+			result[i] = Competitor{v.ID, v.Name}
+		}
+		c.JSON(http.StatusOK, result)
 	}
 }
 
@@ -47,22 +49,23 @@ func CreateCompetitorHandler(srv services.CompetitorService) func(c *gin.Context
 
 		obj, err := srv.Create(c, name)
 
-		switch err.Reason() {
-		case services.ErrReasonInternalError:
-			log.Println(err.LongErr())
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"msg": err.ShortErr(),
-			})
-			break
-		case services.ErrReasonAlreadyExist:
-			log.Println(err.LongErr())
-			c.JSON(http.StatusConflict, gin.H{
-				"msg": err.ShortErr(),
-			})
-			break
-		default:
-			c.JSON(http.StatusAccepted, Competitor{obj.ID, obj.Name})
-			break
+		if err != nil {
+			switch err.Reason() {
+			case services.ErrReasonInternalError:
+				log.Println(err.LongErr())
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"msg": err.ShortErr(),
+				})
+				break
+			case services.ErrReasonAlreadyExist:
+				log.Println(err.LongErr())
+				c.JSON(http.StatusConflict, gin.H{
+					"msg": err.ShortErr(),
+				})
+				break
+			}
+			return
 		}
+		c.JSON(http.StatusAccepted, Competitor{obj.ID, obj.Name})
 	}
 }
