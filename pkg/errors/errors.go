@@ -1,4 +1,4 @@
-package err
+package errors
 
 type Error interface {
 	Reason() int
@@ -24,7 +24,7 @@ func (e errorType) LongErr() string {
 	return e.long
 }
 
-func New(reason int, short, long string) Error {
+func CreateError(reason int, short, long string) Error {
 	return &errorType{
 		reason: reason,
 		short:  short,

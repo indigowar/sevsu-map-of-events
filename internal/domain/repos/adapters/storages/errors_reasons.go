@@ -7,9 +7,9 @@ This integer values are used to change logic of handling error.
 When the repository returns an error, you can access to this reason as:
 ```
 
-_, err := repository.Job()
+_, errors := repository.Job()
 
-switch (err.Reason) {
+switch (errors.Reason) {
 
 case ErrReason1:
 	{ do here a specific logic }
