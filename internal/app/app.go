@@ -14,7 +14,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/indigowar/map-of-events/internal/config"
-	"github.com/indigowar/map-of-events/internal/infra/adapters/storages"
+	"github.com/indigowar/map-of-events/internal/infra/adapters/storages/postgres"
 	"github.com/indigowar/map-of-events/internal/infra/ports/delivery/http/v1/files"
 	"github.com/indigowar/map-of-events/internal/infra/ports/delivery/http/v1/json"
 	json2 "github.com/indigowar/map-of-events/internal/infra/ports/delivery/http/v2/json"
@@ -36,13 +36,13 @@ func Run(cfg *config.Config) {
 	}
 	defer postgresCPool.Close()
 
-	competitorStorage := storages.NewPostgresCompetitorStorage(postgresCPool)
-	organizerStorage := storages.NewPostgresOrganizerStorage(postgresCPool)
-	foundingRangeStorage := storages.NewFoundingRangePostgresStorage(postgresCPool)
-	coFoundingRangeStorage := storages.NewCoFoundingRangePostgresStorage(postgresCPool)
-	subjectStorage := storages.NewPostgresSubjectStorage(postgresCPool)
-	eventStorage := storages.NewPostgresEventStorage(postgresCPool)
-	imageStorage := storages.NewPostgresImageStorage(postgresCPool)
+	competitorStorage := postgres.NewPostgresCompetitorStorage(postgresCPool)
+	organizerStorage := postgres.NewPostgresOrganizerStorage(postgresCPool)
+	foundingRangeStorage := postgres.NewFoundingRangePostgresStorage(postgresCPool)
+	coFoundingRangeStorage := postgres.NewCoFoundingRangePostgresStorage(postgresCPool)
+	subjectStorage := postgres.NewPostgresSubjectStorage(postgresCPool)
+	eventStorage := postgres.NewPostgresEventStorage(postgresCPool)
+	imageStorage := postgres.NewPostgresImageStorage(postgresCPool)
 
 	imageService := services.NewImageService(imageStorage)
 
