@@ -61,3 +61,9 @@ type StoredImage struct {
 	Link  string
 	Value []byte
 }
+
+type User struct {
+	ID       uuid.UUID
+	Name     string
+	Password string
+}
