@@ -72,7 +72,16 @@ CREATE TABLE competitor_requirements
     FOREIGN KEY (cr_competitor) REFERENCES competitor (competitor_id)
 );
 
-CREATE TABLE images(
-    link VARCHAR(512) PRIMARY KEY,
+CREATE TABLE images
+(
+    link  VARCHAR(512) PRIMARY KEY,
     value BYTEA NOT NULL
+);
+
+
+CREATE TABLE authenticatedUsers
+(
+    id       UUID PRIMARY KEY,
+    name     VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL
 );
