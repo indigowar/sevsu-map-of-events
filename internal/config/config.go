@@ -12,6 +12,9 @@ const (
 	defaultHTTPRWTimeout          = 10 * time.Second
 	defaultHTTPMaxHeaderMegaBytes = 1
 
+	defaultAccessTTL  = time.Minute * 5
+	defaultRefreshTTL = time.Hour * 24 * 14
+
 	envLocal = "local"
 )
 
@@ -34,7 +37,14 @@ type (
 	Config struct {
 		HTTP        HTTPConfig
 		Postgres    PostgresConfig
+		Auth        AuthConfig
 		Environment string
+	}
+
+	AuthConfig struct {
+		AccessTTL  time.Duration `mapstructure:"accessTokenTTL"`
+		RefreshTTL time.Duration `mapstructure:"refreshTokenTTL"`
+		SigningKey string        `mapstructure:"key"`
 	}
 )
 
@@ -57,6 +67,9 @@ func Init(configDir string) (*Config, error) {
 }
 
 func populateDefaults() {
+	viper.SetDefault("auth.refresh_token_ttl", defaultRefreshTTL)
+	viper.SetDefault("auth.access_token_ttl", defaultAccessTTL)
+
 	viper.SetDefault("http.port", defaultHTTPPort)
 	viper.SetDefault("http.timeouts.write", defaultHTTPRWTimeout)
 	viper.SetDefault("http.timeouts.read", defaultHTTPRWTimeout)
@@ -90,6 +103,8 @@ func unmarshal(c *Config) error {
 
 func setFromEnv(c *Config) {
 	c.Environment = os.Getenv("APP_ENV")
+
+	c.Auth.SigningKey = os.Getenv("SECRET")
 
 	c.Postgres.Name = os.Getenv("POSTGRES_DB_NAME")
 	c.Postgres.User = os.Getenv("POSTGRES_DB_USER")
