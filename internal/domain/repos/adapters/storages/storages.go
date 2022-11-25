@@ -136,3 +136,20 @@ type EventStorage interface {
 
 	StorageWithTransaction
 }
+
+type UserStorage interface {
+	GetByID(ctx context.Context, id uuid.UUID) (models.User, error)
+	GetByName(ctx context.Context, name string) (models.User, error)
+	Create(ctx context.Context, user models.User) error
+	Delete(ctx context.Context, id uuid.UUID) error
+	UpdateName(ctx context.Context, id uuid.UUID, name string) error
+	UpdatePassword(ctx context.Context, id uuid.UUID, password string) error
+}
+
+type SessionStorage interface {
+	GetByToken(ctx context.Context, token string) (models.TokenSession, error)
+	GetByUser(ctx context.Context, id uuid.UUID) (models.TokenSession, error)
+
+	Create(ctx context.Context, session models.TokenSession) error
+	Delete(ctx context.Context, token string) error
+}
