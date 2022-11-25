@@ -4,12 +4,12 @@ import (
 	"context"
 
 	"github.com/indigowar/map-of-events/internal/config"
-	"github.com/indigowar/map-of-events/internal/domain/repos/adapters/storages"
+	"github.com/indigowar/map-of-events/internal/domain/adapters"
 	"github.com/indigowar/map-of-events/internal/domain/services"
 )
 
 type authService struct {
-	userStorage storages.UserStorage
+	userStorage adapters.UserStorage
 	config      config.AuthConfig
 }
 
@@ -33,7 +33,7 @@ func (svc authService) CreateUser(ctx context.Context, name, password string) (s
 	panic("implement me")
 }
 
-func NewAuthService(userStorage storages.UserStorage, cfg config.AuthConfig) services.AuthService {
+func NewAuthService(userStorage adapters.UserStorage, cfg config.AuthConfig) services.AuthService {
 	return &authService{
 		userStorage: userStorage,
 		config:      cfg,

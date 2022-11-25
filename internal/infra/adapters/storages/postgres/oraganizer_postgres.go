@@ -9,8 +9,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/indigowar/map-of-events/internal/domain/adapters"
 	"github.com/indigowar/map-of-events/internal/domain/models"
-	"github.com/indigowar/map-of-events/internal/domain/repos/adapters/storages"
 	"github.com/indigowar/map-of-events/pkg/postgres"
 )
 
@@ -81,7 +81,7 @@ func (s PostgresOrganizerStorage) CloseTransaction(ctx context.Context, transact
 	return tx.Rollback(ctx)
 }
 
-func NewPostgresOrganizerStorage(p *pgxpool.Pool) storages.OrganizerStorage {
+func NewPostgresOrganizerStorage(p *pgxpool.Pool) adapters.OrganizerStorage {
 	return &PostgresOrganizerStorage{
 		pool: p,
 	}

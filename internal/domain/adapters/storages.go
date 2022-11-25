@@ -1,4 +1,4 @@
-package storages
+package adapters
 
 import (
 	"context"

@@ -8,8 +8,8 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/indigowar/map-of-events/internal/domain/adapters"
 	"github.com/indigowar/map-of-events/internal/domain/models"
-	"github.com/indigowar/map-of-events/internal/domain/repos/adapters/storages"
 	"github.com/indigowar/map-of-events/pkg/postgres"
 )
 
@@ -87,7 +87,7 @@ func (s PostgresImageStorage) Update(ctx context.Context, image models.StoredIma
 	return nil
 }
 
-func NewPostgresImageStorage(pool *pgxpool.Pool) storages.ImageStorage {
+func NewPostgresImageStorage(pool *pgxpool.Pool) adapters.ImageStorage {
 	return &PostgresImageStorage{
 		pool: pool,
 	}

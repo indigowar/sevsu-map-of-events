@@ -5,13 +5,13 @@ import (
 	"errors"
 	"log"
 
+	"github.com/indigowar/map-of-events/internal/domain/adapters"
 	"github.com/indigowar/map-of-events/internal/domain/models"
-	"github.com/indigowar/map-of-events/internal/domain/repos/adapters/storages"
 	"github.com/indigowar/map-of-events/internal/domain/services"
 )
 
 type imageService struct {
-	storage storages.ImageStorage
+	storage adapters.ImageStorage
 }
 
 func (svc imageService) GetAllLinks(ctx context.Context) ([]string, error) {
@@ -71,7 +71,7 @@ func (svc imageService) Update(ctx context.Context, link string, image []byte) (
 	return svc.Get(ctx, link)
 }
 
-func NewImageService(storage storages.ImageStorage) services.ImageService {
+func NewImageService(storage adapters.ImageStorage) services.ImageService {
 	return &imageService{
 		storage: storage,
 	}

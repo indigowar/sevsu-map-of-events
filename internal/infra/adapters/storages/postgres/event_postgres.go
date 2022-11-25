@@ -10,8 +10,8 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/indigowar/map-of-events/internal/domain/adapters"
 	"github.com/indigowar/map-of-events/internal/domain/models"
-	"github.com/indigowar/map-of-events/internal/domain/repos/adapters/storages"
 	"github.com/indigowar/map-of-events/pkg/postgres"
 )
 
@@ -230,7 +230,7 @@ func (s postgresEventStorage) GetCompetitors(ctx context.Context, id uuid.UUID) 
 	return ids, nil
 }
 
-func NewPostgresEventStorage(p *pgxpool.Pool) storages.EventStorage {
+func NewPostgresEventStorage(p *pgxpool.Pool) adapters.EventStorage {
 	return &postgresEventStorage{
 		pool: p,
 	}

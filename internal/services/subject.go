@@ -7,13 +7,13 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/indigowar/map-of-events/internal/domain/adapters"
 	"github.com/indigowar/map-of-events/internal/domain/models"
-	"github.com/indigowar/map-of-events/internal/domain/repos/adapters/storages"
 	"github.com/indigowar/map-of-events/internal/domain/services"
 )
 
 type subjectService struct {
-	storage storages.SubjectStorage
+	storage adapters.SubjectStorage
 }
 
 func (svc subjectService) GetAllExisting(ctx context.Context) ([]models.Subject, error) {
@@ -62,7 +62,7 @@ func (svc subjectService) Update(ctx context.Context, subject models.Subject) er
 	return svc.Update(ctx, subject)
 }
 
-func NewSubjectService(storage storages.SubjectStorage) services.SubjectService {
+func NewSubjectService(storage adapters.SubjectStorage) services.SubjectService {
 	return &subjectService{
 		storage: storage,
 	}

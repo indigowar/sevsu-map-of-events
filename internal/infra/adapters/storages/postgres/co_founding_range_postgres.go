@@ -9,8 +9,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/indigowar/map-of-events/internal/domain/adapters"
 	"github.com/indigowar/map-of-events/internal/domain/models"
-	"github.com/indigowar/map-of-events/internal/domain/repos/adapters/storages"
 	"github.com/indigowar/map-of-events/pkg/postgres"
 )
 
@@ -75,7 +75,7 @@ func (s coFoundingRangePostgresStorage) Delete(ctx context.Context, id uuid.UUID
 
 	return nil
 }
-func NewCoFoundingRangePostgresStorage(p *pgxpool.Pool) storages.RangeStorage {
+func NewCoFoundingRangePostgresStorage(p *pgxpool.Pool) adapters.RangeStorage {
 	return &coFoundingRangePostgresStorage{
 		pool: p,
 	}

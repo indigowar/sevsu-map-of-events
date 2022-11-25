@@ -7,8 +7,8 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/indigowar/map-of-events/internal/domain/adapters"
 	"github.com/indigowar/map-of-events/internal/domain/models"
-	"github.com/indigowar/map-of-events/internal/domain/repos/adapters/storages"
 	"github.com/indigowar/map-of-events/internal/domain/services"
 	"github.com/indigowar/map-of-events/internal/domain/validators"
 )
@@ -20,7 +20,7 @@ type eventService struct {
 	competitors      services.CompetitorService
 	subjects         services.SubjectService
 
-	eventStorage storages.EventStorage
+	eventStorage adapters.EventStorage
 }
 
 func (svc eventService) AllIDs(ctx context.Context) ([]uuid.UUID, error) {
@@ -113,7 +113,7 @@ func (svc eventService) Create(ctx context.Context, info services.EventCreateInf
 	if err != nil {
 		log.Println(err)
 	}
-	defer func(eventStorage storages.EventStorage, ctx context.Context, transaction interface{}) {
+	defer func(eventStorage adapters.EventStorage, ctx context.Context, transaction interface{}) {
 		_ = eventStorage.CloseTransaction(ctx, transaction)
 	}(svc.eventStorage, ctx, tx)
 
@@ -272,7 +272,7 @@ func (svc eventService) Update(ctx context.Context, id uuid.UUID, info services.
 	if err != nil {
 		log.Println(err)
 	}
-	defer func(eventStorage storages.EventStorage, ctx context.Context, transaction interface{}) {
+	defer func(eventStorage adapters.EventStorage, ctx context.Context, transaction interface{}) {
 		_ = eventStorage.CloseTransaction(ctx, transaction)
 	}(svc.eventStorage, ctx, tx)
 
@@ -302,7 +302,7 @@ func (svc eventService) Update(ctx context.Context, id uuid.UUID, info services.
 	return storedEvent, nil
 }
 
-func NewEventServices(storage storages.EventStorage,
+func NewEventServices(storage adapters.EventStorage,
 	subjects services.SubjectService,
 	organizer services.OrganizerService,
 	foundingRange, coFoundingRange services.RangeService,

@@ -8,8 +8,8 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/indigowar/map-of-events/internal/domain/adapters"
 	"github.com/indigowar/map-of-events/internal/domain/models"
-	"github.com/indigowar/map-of-events/internal/domain/repos/adapters/storages"
 	"github.com/indigowar/map-of-events/pkg/errors"
 	"github.com/indigowar/map-of-events/pkg/postgres"
 )
@@ -18,7 +18,7 @@ type competitorStorage struct {
 	pool *pgxpool.Pool
 }
 
-func NewPostgresCompetitorStorage(p *pgxpool.Pool) storages.CompetitorStorage {
+func NewPostgresCompetitorStorage(p *pgxpool.Pool) adapters.CompetitorStorage {
 	return &competitorStorage{pool: p}
 }
 
@@ -55,7 +55,7 @@ func (s competitorStorage) Get(ctx context.Context, id uuid.UUID) (models.Compet
 	query := fmt.Sprintf("SELECT * FROM competitor WHERE competitor_id == '%s'", id.String())
 	if err := dataSource.QueryRow(ctx, query).Scan(&c.ID, &c.Name); err != nil {
 		return models.Competitor{}, handleTheError(err,
-			errors.CreateError(storages.ErrReasonObjectNotFoundErr, "object was not found",
+			errors.CreateError(adapters.ErrReasonObjectNotFoundErr, "object was not found",
 				fmt.Sprintf("object %s was not found in competitors", id.String())))
 	}
 	return c, nil
@@ -122,7 +122,7 @@ func (s competitorStorage) CloseTransaction(ctx context.Context, transaction int
 
 // just a shortcut of errors.CreateError(storages.ErrReasonInternalStorageErr, ...)
 func createInternalStorageError(e error, failedJob string) errors.Error {
-	return errors.CreateError(storages.ErrReasonInternalStorageErr, failedJob, failedJob+":"+e.Error())
+	return errors.CreateError(adapters.ErrReasonInternalStorageErr, failedJob, failedJob+":"+e.Error())
 }
 
 // will check all errors, if they're about transaction will return the transaction failure error

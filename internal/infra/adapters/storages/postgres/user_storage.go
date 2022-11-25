@@ -9,8 +9,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/indigowar/map-of-events/internal/domain/adapters"
 	"github.com/indigowar/map-of-events/internal/domain/models"
-	"github.com/indigowar/map-of-events/internal/domain/repos/adapters/storages"
 )
 
 type userStorage struct {
@@ -87,7 +87,7 @@ func (storage userStorage) UpdatePassword(ctx context.Context, id uuid.UUID, pas
 	return nil
 }
 
-func NewPostgresUserStorage(pool *pgxpool.Pool) storages.UserStorage {
+func NewPostgresUserStorage(pool *pgxpool.Pool) adapters.UserStorage {
 	return &userStorage{
 		pool: pool,
 	}

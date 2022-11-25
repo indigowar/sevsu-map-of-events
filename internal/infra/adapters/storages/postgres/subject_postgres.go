@@ -9,8 +9,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/indigowar/map-of-events/internal/domain/adapters"
 	"github.com/indigowar/map-of-events/internal/domain/models"
-	"github.com/indigowar/map-of-events/internal/domain/repos/adapters/storages"
 	"github.com/indigowar/map-of-events/pkg/postgres"
 )
 
@@ -144,7 +144,7 @@ func (s postgresSubjectStorage) Update(ctx context.Context, subject models.Subje
 	return nil
 }
 
-func NewPostgresSubjectStorage(p *pgxpool.Pool) storages.SubjectStorage {
+func NewPostgresSubjectStorage(p *pgxpool.Pool) adapters.SubjectStorage {
 	return &postgresSubjectStorage{
 		pool: p,
 	}

@@ -7,13 +7,13 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/indigowar/map-of-events/internal/domain/adapters"
 	"github.com/indigowar/map-of-events/internal/domain/models"
-	"github.com/indigowar/map-of-events/internal/domain/repos/adapters/storages"
 	"github.com/indigowar/map-of-events/internal/domain/services"
 )
 
 type organizerSvc struct {
-	storage storages.OrganizerStorage
+	storage adapters.OrganizerStorage
 
 	imageSvc services.ImageService
 }
@@ -99,7 +99,7 @@ func (o organizerSvc) Update(ctx context.Context, id uuid.UUID, name, logo strin
 	return m, nil
 }
 
-func NewOrganizerService(storage storages.OrganizerStorage, imageSvc services.ImageService) (services.OrganizerService, error) {
+func NewOrganizerService(storage adapters.OrganizerStorage, imageSvc services.ImageService) (services.OrganizerService, error) {
 	return &organizerSvc{
 		storage:  storage,
 		imageSvc: imageSvc,

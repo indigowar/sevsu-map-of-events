@@ -7,14 +7,14 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/indigowar/map-of-events/internal/domain/adapters"
 	"github.com/indigowar/map-of-events/internal/domain/models"
-	"github.com/indigowar/map-of-events/internal/domain/repos/adapters/storages"
 	"github.com/indigowar/map-of-events/internal/domain/services"
 	"github.com/indigowar/map-of-events/pkg/errors"
 )
 
 type competitorService struct {
-	storage storages.CompetitorStorage
+	storage adapters.CompetitorStorage
 }
 
 func (svc competitorService) AllIDs(ctx context.Context) ([]uuid.UUID, errors.Error) {
@@ -64,7 +64,7 @@ func (svc competitorService) Delete(ctx context.Context, id uuid.UUID) errors.Er
 	return nil
 }
 
-func NewCompetitorService(storage storages.CompetitorStorage) services.CompetitorService {
+func NewCompetitorService(storage adapters.CompetitorStorage) services.CompetitorService {
 	return &competitorService{
 		storage: storage,
 	}
