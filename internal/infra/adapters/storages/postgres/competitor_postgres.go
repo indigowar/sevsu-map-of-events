@@ -111,11 +111,11 @@ func (s competitorStorage) Delete(ctx context.Context, id uuid.UUID) errors.Erro
 	return createInternalStorageError(err, "failed to delete a competitor")
 }
 
-func (s competitorStorage) InvokeTransactionMechanism(ctx context.Context) (interface{}, error) {
+func (s competitorStorage) BeginTransaction(ctx context.Context) (interface{}, error) {
 	return s.pool.Begin(ctx)
 }
 
-func (s competitorStorage) ShadowTransactionMechanism(ctx context.Context, transaction interface{}) error {
+func (s competitorStorage) CloseTransaction(ctx context.Context, transaction interface{}) error {
 	tx := transaction.(*pgxpool.Tx)
 	return tx.Rollback(ctx)
 }

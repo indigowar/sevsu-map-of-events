@@ -14,7 +14,7 @@ import (
 )
 
 type rangeService struct {
-	storage        storages.RangeStorageRepository
+	storage        storages.RangeStorage
 	validatorsList []func(foundingRange models.RangeModel) error
 }
 
@@ -67,14 +67,14 @@ func (svc rangeService) Update(ctx context.Context, foundingRange models.RangeMo
 	return svc.storage.Create(ctx, foundingRange)
 }
 
-func NewFoundingRangeService(storage storages.RangeStorageRepository) services.RangeService {
+func NewFoundingRangeService(storage storages.RangeStorage) services.RangeService {
 	return &rangeService{
 		storage:        storage,
 		validatorsList: []func(foundingRange models.RangeModel) error{validators.ValidateRange},
 	}
 }
 
-func NewCoFoundingRangeService(storage storages.RangeStorageRepository) services.RangeService {
+func NewCoFoundingRangeService(storage storages.RangeStorage) services.RangeService {
 	return &rangeService{
 		storage: storage,
 		validatorsList: []func(foundingRange models.RangeModel) error{

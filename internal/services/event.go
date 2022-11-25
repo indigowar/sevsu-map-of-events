@@ -20,7 +20,7 @@ type eventService struct {
 	competitors      services.CompetitorService
 	subjects         services.SubjectService
 
-	eventStorage storages.EventStorageRepository
+	eventStorage storages.EventStorage
 }
 
 func (svc eventService) AllIDs(ctx context.Context) ([]uuid.UUID, error) {
@@ -109,12 +109,12 @@ func (svc eventService) Create(ctx context.Context, info services.EventCreateInf
 		return models.Event{}, err
 	}
 
-	tx, err := svc.eventStorage.InvokeTransactionMechanism(ctx)
+	tx, err := svc.eventStorage.BeginTransaction(ctx)
 	if err != nil {
 		log.Println(err)
 	}
-	defer func(eventStorage storages.EventStorageRepository, ctx context.Context, transaction interface{}) {
-		_ = eventStorage.ShadowTransactionMechanism(ctx, transaction)
+	defer func(eventStorage storages.EventStorage, ctx context.Context, transaction interface{}) {
+		_ = eventStorage.CloseTransaction(ctx, transaction)
 	}(svc.eventStorage, ctx, tx)
 
 	serviceCtx := context.WithValue(ctx, "connection", tx)
@@ -149,7 +149,7 @@ func (svc eventService) Create(ctx context.Context, info services.EventCreateInf
 		Competitors:         info.Competitors,
 	}
 
-	if err := svc.eventStorage.Create(serviceCtx, event); err != nil {
+	if err := svc.eventStorage.Add(serviceCtx, event); err != nil {
 		log.Println(err)
 		return models.Event{}, errors.New("failed to create - event")
 	}
@@ -163,13 +163,13 @@ func (svc eventService) Create(ctx context.Context, info services.EventCreateInf
 }
 
 func (svc eventService) Delete(ctx context.Context, id uuid.UUID) error {
-	transaction, err := svc.eventStorage.InvokeTransactionMechanism(ctx)
+	transaction, err := svc.eventStorage.BeginTransaction(ctx)
 	if err != nil {
 		log.Println(err)
 		return errors.New("failed to star a transaction")
 	}
 	defer func() {
-		_ = svc.eventStorage.ShadowTransactionMechanism(ctx, transaction)
+		_ = svc.eventStorage.CloseTransaction(ctx, transaction)
 	}()
 	serviceCtx := context.WithValue(ctx, "connection", transaction)
 
@@ -201,7 +201,7 @@ func (svc eventService) Delete(ctx context.Context, id uuid.UUID) error {
 		}
 	}
 
-	err = svc.eventStorage.Delete(serviceCtx, event.ID)
+	err = svc.eventStorage.Remove(serviceCtx, event.ID)
 	if err != nil {
 		log.Println(err)
 		return errors.New("failed to delete event")
@@ -268,12 +268,12 @@ func (svc eventService) Update(ctx context.Context, id uuid.UUID, info services.
 		return models.Event{}, err
 	}
 
-	tx, err := svc.eventStorage.InvokeTransactionMechanism(ctx)
+	tx, err := svc.eventStorage.BeginTransaction(ctx)
 	if err != nil {
 		log.Println(err)
 	}
-	defer func(eventStorage storages.EventStorageRepository, ctx context.Context, transaction interface{}) {
-		_ = eventStorage.ShadowTransactionMechanism(ctx, transaction)
+	defer func(eventStorage storages.EventStorage, ctx context.Context, transaction interface{}) {
+		_ = eventStorage.CloseTransaction(ctx, transaction)
 	}(svc.eventStorage, ctx, tx)
 
 	serviceCtx := context.WithValue(ctx, "connection", tx)
@@ -302,7 +302,7 @@ func (svc eventService) Update(ctx context.Context, id uuid.UUID, info services.
 	return storedEvent, nil
 }
 
-func NewEventServices(storage storages.EventStorageRepository,
+func NewEventServices(storage storages.EventStorage,
 	subjects services.SubjectService,
 	organizer services.OrganizerService,
 	foundingRange, coFoundingRange services.RangeService,

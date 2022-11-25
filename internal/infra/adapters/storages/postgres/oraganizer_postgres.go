@@ -72,16 +72,16 @@ func (s PostgresOrganizerStorage) GetLevelsIDs(ctx context.Context) ([]uuid.UUID
 	return ids, nil
 }
 
-func (s PostgresOrganizerStorage) InvokeTransactionMechanism(ctx context.Context) (interface{}, error) {
+func (s PostgresOrganizerStorage) BeginTransaction(ctx context.Context) (interface{}, error) {
 	return s.pool.Begin(ctx)
 }
 
-func (s PostgresOrganizerStorage) ShadowTransactionMechanism(ctx context.Context, transaction interface{}) error {
+func (s PostgresOrganizerStorage) CloseTransaction(ctx context.Context, transaction interface{}) error {
 	tx := transaction.(*pgxpool.Tx)
 	return tx.Rollback(ctx)
 }
 
-func NewPostgresOrganizerStorage(p *pgxpool.Pool) storages.OrganizerStorageRepository {
+func NewPostgresOrganizerStorage(p *pgxpool.Pool) storages.OrganizerStorage {
 	return &PostgresOrganizerStorage{
 		pool: p,
 	}
@@ -138,7 +138,7 @@ func (s PostgresOrganizerStorage) GetAll(ctx context.Context) ([]models.Organize
 	return organizers, nil
 }
 
-func (s PostgresOrganizerStorage) Create(ctx context.Context, organizer models.Organizer) error {
+func (s PostgresOrganizerStorage) Add(ctx context.Context, organizer models.Organizer) error {
 	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
 
 	command := "INSERT INTO organizer (organizer_id, organizer_name, organizer_image, organizer_level) VALUES ($1, $2, $3, $4)"
@@ -150,7 +150,7 @@ func (s PostgresOrganizerStorage) Create(ctx context.Context, organizer models.O
 	return nil
 }
 
-func (s PostgresOrganizerStorage) Delete(ctx context.Context, id uuid.UUID) error {
+func (s PostgresOrganizerStorage) Remove(ctx context.Context, id uuid.UUID) error {
 	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
 
 	_, err := dataSource.Exec(ctx, "DELETE FROM organizer WHERE organizer_id=$1", id)
@@ -219,7 +219,7 @@ func (s PostgresOrganizerStorage) AddLevel(ctx context.Context, level models.Org
 	return nil
 }
 
-func (s PostgresOrganizerStorage) DeleteLevel(ctx context.Context, id uuid.UUID) error {
+func (s PostgresOrganizerStorage) RemoveLevel(ctx context.Context, id uuid.UUID) error {
 	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
 
 	command := "DELETE FROM organizer_level WHERE organizer_level_id = $1"

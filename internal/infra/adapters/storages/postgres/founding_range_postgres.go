@@ -18,11 +18,11 @@ type foundingRangeStorage struct {
 	pool *pgxpool.Pool
 }
 
-func (s foundingRangeStorage) InvokeTransactionMechanism(ctx context.Context) (interface{}, error) {
+func (s foundingRangeStorage) BeginTransaction(ctx context.Context) (interface{}, error) {
 	return s.pool.Begin(ctx)
 }
 
-func (s foundingRangeStorage) ShadowTransactionMechanism(ctx context.Context, transaction interface{}) error {
+func (s foundingRangeStorage) CloseTransaction(ctx context.Context, transaction interface{}) error {
 	tx := transaction.(*pgxpool.Tx)
 	return tx.Rollback(ctx)
 }
@@ -79,7 +79,7 @@ func (s foundingRangeStorage) Delete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func NewFoundingRangePostgresStorage(p *pgxpool.Pool) storages.RangeStorageRepository {
+func NewFoundingRangePostgresStorage(p *pgxpool.Pool) storages.RangeStorage {
 	return &foundingRangeStorage{
 		pool: p,
 	}

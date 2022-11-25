@@ -18,11 +18,11 @@ type postgresSubjectStorage struct {
 	pool *pgxpool.Pool
 }
 
-func (s postgresSubjectStorage) InvokeTransactionMechanism(ctx context.Context) (interface{}, error) {
+func (s postgresSubjectStorage) BeginTransaction(ctx context.Context) (interface{}, error) {
 	return s.pool.Begin(ctx)
 }
 
-func (s postgresSubjectStorage) ShadowTransactionMechanism(ctx context.Context, transaction interface{}) error {
+func (s postgresSubjectStorage) CloseTransaction(ctx context.Context, transaction interface{}) error {
 	tx := transaction.(*pgxpool.Tx)
 	return tx.Rollback(ctx)
 }
@@ -144,7 +144,7 @@ func (s postgresSubjectStorage) Update(ctx context.Context, subject models.Subje
 	return nil
 }
 
-func NewPostgresSubjectStorage(p *pgxpool.Pool) storages.SubjectStorageRepository {
+func NewPostgresSubjectStorage(p *pgxpool.Pool) storages.SubjectStorage {
 	return &postgresSubjectStorage{
 		pool: p,
 	}

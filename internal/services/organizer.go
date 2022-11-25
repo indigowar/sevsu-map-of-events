@@ -13,7 +13,7 @@ import (
 )
 
 type organizerSvc struct {
-	storage storages.OrganizerStorageRepository
+	storage storages.OrganizerStorage
 
 	imageSvc services.ImageService
 }
@@ -38,7 +38,7 @@ func (o organizerSvc) Create(ctx context.Context, name, logo string, level uuid.
 	// TODO: add validation of user input
 	organizer :=
 		models.Organizer{ID: uuid.New(), Name: name, Logo: logo, Level: level}
-	err := o.storage.Create(ctx, organizer)
+	err := o.storage.Add(ctx, organizer)
 	if err != nil {
 		return models.Organizer{}, err
 	}
@@ -51,9 +51,9 @@ func (o organizerSvc) Delete(ctx context.Context, id uuid.UUID) error {
 		return err
 	}
 
-	transaction, err := o.storage.InvokeTransactionMechanism(ctx)
+	transaction, err := o.storage.BeginTransaction(ctx)
 	defer func(ctx context.Context, transaction interface{}) {
-		_ = o.storage.ShadowTransactionMechanism(ctx, transaction)
+		_ = o.storage.CloseTransaction(ctx, transaction)
 	}(ctx, transaction)
 
 	serviceCtx := context.WithValue(ctx, "connection", transaction)
@@ -62,7 +62,7 @@ func (o organizerSvc) Delete(ctx context.Context, id uuid.UUID) error {
 		log.Println(err)
 		return errors.New("failed to delete image")
 	}
-	return o.storage.Delete(serviceCtx, id)
+	return o.storage.Remove(serviceCtx, id)
 }
 
 func (o organizerSvc) GetAllLevels(ctx context.Context) ([]models.OrganizerLevel, error) {
@@ -99,7 +99,7 @@ func (o organizerSvc) Update(ctx context.Context, id uuid.UUID, name, logo strin
 	return m, nil
 }
 
-func NewOrganizerService(storage storages.OrganizerStorageRepository, imageSvc services.ImageService) (services.OrganizerService, error) {
+func NewOrganizerService(storage storages.OrganizerStorage, imageSvc services.ImageService) (services.OrganizerService, error) {
 	return &organizerSvc{
 		storage:  storage,
 		imageSvc: imageSvc,

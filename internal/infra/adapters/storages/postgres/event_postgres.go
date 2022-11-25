@@ -19,11 +19,11 @@ type postgresEventStorage struct {
 	pool *pgxpool.Pool
 }
 
-func (s postgresEventStorage) InvokeTransactionMechanism(ctx context.Context) (interface{}, error) {
+func (s postgresEventStorage) BeginTransaction(ctx context.Context) (interface{}, error) {
 	return s.pool.Begin(ctx)
 }
 
-func (s postgresEventStorage) ShadowTransactionMechanism(ctx context.Context, transaction interface{}) error {
+func (s postgresEventStorage) CloseTransaction(ctx context.Context, transaction interface{}) error {
 	tx := transaction.(*pgxpool.Tx)
 	return tx.Rollback(ctx)
 }
@@ -60,11 +60,6 @@ func (s postgresEventStorage) GetIDList(ctx context.Context) ([]uuid.UUID, error
 	return results, nil
 }
 
-func (s postgresEventStorage) Filter(_ context.Context) ([]uuid.UUID, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (s postgresEventStorage) GetByID(ctx context.Context, id uuid.UUID) (models.Event, error) {
 	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
 
@@ -91,7 +86,7 @@ func (s postgresEventStorage) GetByID(ctx context.Context, id uuid.UUID) (models
 	return event, nil
 }
 
-func (s postgresEventStorage) Create(ctx context.Context, event models.Event) error {
+func (s postgresEventStorage) Add(ctx context.Context, event models.Event) error {
 	command :=
 		`INSERT INTO event(
                   event_id, title, event_organizer, event_founding_type, event_founding_range, event_co_founding_range,
@@ -124,7 +119,7 @@ func (s postgresEventStorage) Create(ctx context.Context, event models.Event) er
 	return nil
 }
 
-func (s postgresEventStorage) Delete(ctx context.Context, id uuid.UUID) error {
+func (s postgresEventStorage) Remove(ctx context.Context, id uuid.UUID) error {
 	tx, err := s.pool.Begin(ctx)
 	if err != nil {
 		log.Println(err)
@@ -235,7 +230,7 @@ func (s postgresEventStorage) GetCompetitors(ctx context.Context, id uuid.UUID) 
 	return ids, nil
 }
 
-func NewPostgresEventStorage(p *pgxpool.Pool) storages.EventStorageRepository {
+func NewPostgresEventStorage(p *pgxpool.Pool) storages.EventStorage {
 	return &postgresEventStorage{
 		pool: p,
 	}

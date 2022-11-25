@@ -50,7 +50,7 @@ func (s PostgresImageStorage) Get(ctx context.Context, link string) (models.Stor
 	return image, nil
 }
 
-func (s PostgresImageStorage) Create(ctx context.Context, image models.StoredImage) error {
+func (s PostgresImageStorage) Add(ctx context.Context, image models.StoredImage) error {
 	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
 
 	command := "INSERT INTO images(link, value) VALUES ($1, $2)"
@@ -63,7 +63,7 @@ func (s PostgresImageStorage) Create(ctx context.Context, image models.StoredIma
 	return nil
 }
 
-func (s PostgresImageStorage) Delete(ctx context.Context, link string) error {
+func (s PostgresImageStorage) Remove(ctx context.Context, link string) error {
 	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
 
 	command := "DELETE FROM images WHERE link = $1"

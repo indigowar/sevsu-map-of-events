@@ -13,7 +13,7 @@ import (
 )
 
 type subjectService struct {
-	storage storages.SubjectStorageRepository
+	storage storages.SubjectStorage
 }
 
 func (svc subjectService) GetAllExisting(ctx context.Context) ([]models.Subject, error) {
@@ -62,7 +62,7 @@ func (svc subjectService) Update(ctx context.Context, subject models.Subject) er
 	return svc.Update(ctx, subject)
 }
 
-func NewSubjectService(storage storages.SubjectStorageRepository) services.SubjectService {
+func NewSubjectService(storage storages.SubjectStorage) services.SubjectService {
 	return &subjectService{
 		storage: storage,
 	}
