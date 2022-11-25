@@ -25,7 +25,7 @@ and so on.
  **/
 
 const (
-	ErrReasonInternalStorage = iota
-	ErrReasonObjectNotFound
-	ErrReasonObjectAlreadyExists
+	ErrReasonInternalStorageErr = iota
+	ErrReasonObjectNotFoundErr
+	ErrReasonObjectAlreadyExistsErr
 )

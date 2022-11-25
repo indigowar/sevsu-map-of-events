@@ -2,23 +2,27 @@ package postgres
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"log"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/indigowar/map-of-events/internal/domain/models"
 	"github.com/indigowar/map-of-events/internal/domain/repos/adapters/storages"
+	"github.com/indigowar/map-of-events/pkg/errors"
 	"github.com/indigowar/map-of-events/pkg/postgres"
 )
 
-type PostgresCompetitorStorage struct {
+type competitorStorage struct {
 	pool *pgxpool.Pool
 }
 
-func (s PostgresCompetitorStorage) AllIDs(ctx context.Context) ([]uuid.UUID, error) {
+func NewPostgresCompetitorStorage(p *pgxpool.Pool) storages.CompetitorStorage {
+	return &competitorStorage{pool: p}
+}
+
+func (s competitorStorage) AllIDs(ctx context.Context) ([]uuid.UUID, errors.Error) {
 	query := "SELECT competitor_id FROM competitor"
 
 	result := make([]uuid.UUID, 0)
@@ -26,21 +30,18 @@ func (s PostgresCompetitorStorage) AllIDs(ctx context.Context) ([]uuid.UUID, err
 	rows, err := s.pool.Query(ctx, query)
 
 	if err != nil {
-		log.Println(err)
-		return nil, errors.New("failed to read the database")
+		return nil, handleTheError(err, createInternalStorageError(err, "failed to read database"))
 	}
 
 	for rows.Next() {
 		values, err := rows.Values()
 		if err != nil {
-			log.Println(err)
-			return nil, errors.New("failed to read values from db")
+			return nil, createInternalStorageError(err, "failed to read values of a row")
 		}
-		byteId := values[0].([16]byte)
-		id, err := uuid.FromBytes(byteId[:])
-		if err != nil {
-			log.Println(err)
-			return nil, errors.New("failed to parse id")
+
+		id, e := parseIDFromValue(values[0])
+		if e != nil {
+			return nil, e
 		}
 		result = append(result, id)
 	}
@@ -48,89 +49,101 @@ func (s PostgresCompetitorStorage) AllIDs(ctx context.Context) ([]uuid.UUID, err
 	return result, nil
 }
 
-func (s PostgresCompetitorStorage) Get(ctx context.Context, id uuid.UUID) (models.Competitor, error) {
+func (s competitorStorage) Get(ctx context.Context, id uuid.UUID) (models.Competitor, errors.Error) {
 	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
-
-	var Id uuid.UUID
-	var name string
-
+	var c models.Competitor
 	query := fmt.Sprintf("SELECT * FROM competitor WHERE competitor_id == '%s'", id.String())
-
-	if err := dataSource.QueryRow(ctx, query).Scan(&Id, &name); err != nil {
-		log.Println("Got query error or scan error: ", err)
-		return models.Competitor{}, err
+	if err := dataSource.QueryRow(ctx, query).Scan(&c.ID, &c.Name); err != nil {
+		return models.Competitor{}, handleTheError(err,
+			errors.CreateError(storages.ErrReasonObjectNotFoundErr, "object was not found",
+				fmt.Sprintf("object %s was not found in competitors", id.String())))
 	}
-
-	return models.Competitor{ID: id, Name: name}, nil
+	return c, nil
 }
 
-func (s PostgresCompetitorStorage) GetAll(ctx context.Context) ([]models.Competitor, error) {
+func (s competitorStorage) GetAll(ctx context.Context) ([]models.Competitor, errors.Error) {
 	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
 
 	comps := make([]models.Competitor, 0)
 
 	rows, err := dataSource.Query(ctx, "SELECT * FROM competitor")
 	if err != nil {
-		log.Println("Failed to read from database")
-		return nil, err
+		return nil, handleTheError(err, createInternalStorageError(err, "failed to read database"))
 	}
 
 	for rows.Next() {
 		values, err := rows.Values()
 		if err != nil {
-			log.Println("Failed to read fetched value from database")
-			return nil, err
+			return nil, handleTheError(err, createInternalStorageError(err, "failed to read values"))
 		}
-
-		id := values[0].([16]byte)
+		id, e := parseIDFromValue(values[0])
+		if e != nil {
+			return nil, e
+		}
 		name := values[1].(string)
-
-		parsedId, _ := uuid.FromBytes(id[:])
-
-		comps = append(comps, models.Competitor{ID: parsedId, Name: name})
+		comps = append(comps, models.Competitor{ID: id, Name: name})
 	}
 
 	return comps, nil
 }
 
-func (s PostgresCompetitorStorage) Create(ctx context.Context, competitor models.Competitor) error {
+func (s competitorStorage) Create(ctx context.Context, competitor models.Competitor) errors.Error {
 	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
-
 	command := "INSERT INTO competitor (competitor_id, competitor_name) VALUES ($1, $2)"
 	if _, err := dataSource.Exec(ctx, command, competitor.ID, competitor.Name); err != nil {
-		log.Println(err)
-		return errors.New("failed to create new competitor")
+		return createInternalStorageError(err, "failed to create a competitor")
 	}
 	return nil
 }
 
-func (s PostgresCompetitorStorage) Update(ctx context.Context, competitor models.Competitor) error {
+func (s competitorStorage) Update(ctx context.Context, competitor models.Competitor) errors.Error {
 	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
-
 	command := "UPDATE competitor SET competitor_name = $2 WHERE competitor_id = $1"
 	if _, err := dataSource.Exec(ctx, command, competitor.ID, competitor.Name); err != nil {
-		log.Println(err)
-		return errors.New("failed to update a competitor")
+		return createInternalStorageError(err, "failed to update a competitor")
 	}
 	return nil
 }
 
-func (s PostgresCompetitorStorage) Delete(ctx context.Context, id uuid.UUID) error {
+func (s competitorStorage) Delete(ctx context.Context, id uuid.UUID) errors.Error {
 	dataSource := postgres.GetConnectionFromContextOrDefault(ctx, s.pool)
-
 	_, err := dataSource.Exec(ctx, "DELETE FROM competitor WHERE competitor_id = $1", id)
-	return err
+	return createInternalStorageError(err, "failed to delete a competitor")
 }
 
-func (s PostgresCompetitorStorage) InvokeTransactionMechanism(ctx context.Context) (interface{}, error) {
+func (s competitorStorage) InvokeTransactionMechanism(ctx context.Context) (interface{}, error) {
 	return s.pool.Begin(ctx)
 }
 
-func (s PostgresCompetitorStorage) ShadowTransactionMechanism(ctx context.Context, transaction interface{}) error {
+func (s competitorStorage) ShadowTransactionMechanism(ctx context.Context, transaction interface{}) error {
 	tx := transaction.(*pgxpool.Tx)
 	return tx.Rollback(ctx)
 }
 
-func NewPostgresCompetitorStorage(p *pgxpool.Pool) storages.CompetitorStorage {
-	return &PostgresCompetitorStorage{pool: p}
+// just a shortcut of errors.CreateError(storages.ErrReasonInternalStorageErr, ...)
+func createInternalStorageError(e error, failedJob string) errors.Error {
+	return errors.CreateError(storages.ErrReasonInternalStorageErr, failedJob, failedJob+":"+e.Error())
+}
+
+// will check all errors, if they're about transaction will return the transaction failure error
+func handleTheError(e error, onRows errors.Error) errors.Error {
+	switch e {
+	case pgx.ErrNoRows:
+		return onRows
+	case pgx.ErrTxClosed:
+	case pgx.ErrTxCommitRollback:
+		return createInternalStorageError(e, "transaction failure")
+	}
+	return nil
+}
+
+// parse from interface{} ID
+// under interface{} should be [16]byte
+func parseIDFromValue(v interface{}) (uuid.UUID, errors.Error) {
+	byteId := v.([16]byte)
+	id, err := uuid.FromBytes(byteId[:])
+	if err != nil {
+		return uuid.UUID{}, createInternalStorageError(err, "failed to parse id from a row")
+	}
+	return id, nil
 }

@@ -71,9 +71,9 @@ func NewCompetitorService(storage storages.CompetitorStorage) services.Competito
 }
 
 // failedToReadDatabaseErr - creates an error from e error that explains why failed to read the database
-func failedToReadDatabaseErr(e error, targetOfJob string) errors.Error {
+func failedToReadDatabaseErr(e errors.Error, targetOfJob string) errors.Error {
 	return errors.CreateError(services.ErrReasonInternalError,
 		fmt.Sprintf("failed to %s: internal server error", targetOfJob),
-		fmt.Sprintf("failed to %s: internal server error, because: %s", targetOfJob, e),
+		fmt.Sprintf("failed to %s: internal server error, because: %s", targetOfJob, e.ShortErr()),
 	)
 }
