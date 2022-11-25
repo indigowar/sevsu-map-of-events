@@ -67,3 +67,8 @@ type User struct {
 	Name     string
 	Password string
 }
+
+type TokenSession struct {
+	Token string
+	User  uuid.UUID
+}
