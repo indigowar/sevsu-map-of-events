@@ -85,3 +85,9 @@ CREATE TABLE authenticatedUsers
     name     VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL
 );
+
+CREATE TABLE sessions
+(
+    token VARCHAR(512) PRIMARY KEY,
+    owner UUID NOT NULL UNIQUE
+)
