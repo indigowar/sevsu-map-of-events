@@ -120,6 +120,7 @@ func CreateEventHandler(svc services.EventService) gin.HandlerFunc {
 		if err != nil {
 			log.Println(err)
 			c.Status(http.StatusInternalServerError)
+			return
 		}
 
 		c.JSON(http.StatusCreated, fromModel(result))
