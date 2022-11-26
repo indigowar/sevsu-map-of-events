@@ -16,7 +16,7 @@ func ValidateRange(r models.RangeModel) error {
 	high := r.High
 	low := r.Low
 
-	if high > low {
+	if high < low {
 		return ErrLowBiggerThenHighValue
 	}
 
