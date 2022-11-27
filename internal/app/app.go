@@ -14,11 +14,9 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/indigowar/map-of-events/internal/config"
-	"github.com/indigowar/map-of-events/internal/infra/adapters/storages/postgres"
 	"github.com/indigowar/map-of-events/internal/infra/ports/delivery/http/v1/files"
 	"github.com/indigowar/map-of-events/internal/infra/ports/delivery/http/v1/json"
 	json2 "github.com/indigowar/map-of-events/internal/infra/ports/delivery/http/v2/json"
-	"github.com/indigowar/map-of-events/internal/services"
 )
 
 func Run(cfg *config.Config) {
@@ -36,22 +34,9 @@ func Run(cfg *config.Config) {
 	}
 	defer postgresCPool.Close()
 
-	competitorStorage := postgres.NewPostgresCompetitorStorage(postgresCPool)
-	organizerStorage := postgres.NewPostgresOrganizerStorage(postgresCPool)
-	foundingRangeStorage := postgres.NewFoundingRangePostgresStorage(postgresCPool)
-	coFoundingRangeStorage := postgres.NewCoFoundingRangePostgresStorage(postgresCPool)
-	subjectStorage := postgres.NewPostgresSubjectStorage(postgresCPool)
-	eventStorage := postgres.NewPostgresEventStorage(postgresCPool)
-	imageStorage := postgres.NewPostgresImageStorage(postgresCPool)
+	services := initServices(postgresCPool)
 
-	imageService := services.NewImageService(imageStorage)
-
-	competitorService := services.NewCompetitorService(competitorStorage)
-	organizerService, _ := services.NewOrganizerService(organizerStorage, imageService)
-	foundingService := services.NewFoundingRangeService(foundingRangeStorage)
-	coFoundingService := services.NewCoFoundingRangeService(coFoundingRangeStorage)
-	subjectService := services.NewSubjectService(subjectStorage)
-	eventService := services.NewEventServices(eventStorage, subjectService, organizerService, foundingService, coFoundingService, competitorService)
+	eventHandler := json.NewEventHandler(services)
 
 	r := gin.Default()
 
@@ -59,43 +44,43 @@ func Run(cfg *config.Config) {
 
 	v1 := r.Group("api/v1")
 	{
-		v1.GET("/competitor", json.GetAllCompetitorsHandler(competitorService))
-		v1.POST("/competitor", json.CreateCompetitorHandler(competitorService))
+		v1.GET("/competitor", json.GetAllCompetitorsHandler(services.Competitor))
+		v1.POST("/competitor", json.CreateCompetitorHandler(services.Competitor))
 
-		v1.GET("/founding_range/:id", json.GetByIDRangeHandler(foundingService))
-		v1.GET("/founding_range", json.GetMaximumRangeHandler(foundingService))
+		v1.GET("/founding_range/:id", json.GetByIDRangeHandler(services.FoundingRange))
+		v1.GET("/founding_range", json.GetMaximumRangeHandler(services.FoundingRange))
 
-		v1.GET("/co_founding_range/:id", json.GetByIDRangeHandler(coFoundingService))
-		v1.GET("/co_founding_range", json.GetMaximumRangeHandler(coFoundingService))
+		v1.GET("/co_founding_range/:id", json.GetByIDRangeHandler(services.CoFoundingRange))
+		v1.GET("/co_founding_range", json.GetMaximumRangeHandler(services.CoFoundingRange))
 
-		v1.GET("/organizer_level", json.GetAllOrganizerLevelsHandler(organizerService))
-		v1.POST("/organizer_level", json.CreateOrganizerLevelHandler(organizerService))
+		v1.GET("/organizer_level", json.GetAllOrganizerLevelsHandler(services.Organizer))
+		v1.POST("/organizer_level", json.CreateOrganizerLevelHandler(services.Organizer))
 
-		v1.GET("/organizer", json.GetAllOrganizersHandler(organizerService))
-		v1.POST("/organizer", json.CreateOrganizerHandler(organizerService))
-		v1.GET("/organizer/:id", json.GetByIDOrganizerHandler(organizerService))
-		v1.PUT("/organizer/:id", json.UpdateOrganizerHandler(organizerService))
-		v1.DELETE("/organizer/:id", json.DeleteOrganizerHandler(organizerService))
+		v1.GET("/organizer", json.GetAllOrganizersHandler(services.Organizer))
+		v1.POST("/organizer", json.CreateOrganizerHandler(services.Organizer))
+		v1.GET("/organizer/:id", json.GetByIDOrganizerHandler(services.Organizer))
+		v1.PUT("/organizer/:id", json.UpdateOrganizerHandler(services.Organizer))
+		v1.DELETE("/organizer/:id", json.DeleteOrganizerHandler(services.Organizer))
 
-		v1.GET("/event", json.GetAllEventHandler(eventService))
-		v1.POST("/event", json.CreateEventHandler(eventService))
+		v1.GET("/event", eventHandler.GetAllEvents)
+		v1.POST("/event", eventHandler.Create)
 
-		v1.GET("/event/:id", json.GetByIDEventHandler(eventService, subjectService))
-		v1.DELETE("/event/:id", json.DeleteEventHandler(eventService))
-		v1.PUT("/event/:id", json.UpdateEventHandler(eventService)) // TODO: implement
+		v1.GET("/event/:id", eventHandler.GetEventByID)
+		v1.DELETE("/event/:id", eventHandler.DeleteEvent)
+		v1.PUT("/event/:id", eventHandler.DeleteEvent)
 
-		v1.GET("/minimal_event", json.GetAllAsMinimalHandler(eventService))
-		v1.GET("/minimal_event/:id", json.GetByIDAsMinimalHandler(eventService))
+		v1.GET("/minimal_event", eventHandler.GetAllAsMinimal)
+		v1.GET("/minimal_event/:id", eventHandler.GetByIDMinimal)
 
-		v1.POST("/image", files.UploadHandler(imageService))
-		v1.GET("/image/:link", files.RetrievingHandler(imageService))
+		v1.POST("/image", files.UploadHandler(services.Image))
+		v1.GET("/image/:link", files.RetrievingHandler(services.Image))
 	}
 
 	v2 := r.Group("/api/v2")
 	{
-		v2.GET("/organizer", json2.GetAllOrganizersHandler(organizerService, imageService))
-		v2.POST("/organizer", json2.CreateOrganizerHandler(organizerService, imageService))
-		v2.GET("/organizer/:id", json2.GetOrganizerByID(organizerService, imageService))
+		v2.GET("/organizer", json2.GetAllOrganizersHandler(services.Organizer, services.Image))
+		v2.POST("/organizer", json2.CreateOrganizerHandler(services.Organizer, services.Image))
+		v2.GET("/organizer/:id", json2.GetOrganizerByID(services.Organizer, services.Image))
 	}
 
 	server := &http.Server{
