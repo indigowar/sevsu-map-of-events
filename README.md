@@ -145,7 +145,7 @@ Response:
 }
 ```
 
-###### organizer
+##### organizer
 
 GET `api/v1/organizer/`:
 
@@ -216,7 +216,7 @@ Response:
 }
 ```
 
-POST `api/v1/organizer/{id}`:
+PUT `api/v1/organizer/{id}`:
 
 Updates organizer with ID = id
 
@@ -230,7 +230,12 @@ Request:
 }
 ```
 
+DELETE `api/v1/organizer/{id}`:
+
+Deletes organizer with given id.
+
 Response:
+
 ```json
 {
   "id": "dsffafbc-gdgffd",
@@ -434,7 +439,7 @@ Response:
   "organizer": "",
   "submissionDeadline": "",
   "trl": 0
-},
+}
 ```
 
 POST `api/v1/event/{id}`:

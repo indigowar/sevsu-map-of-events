@@ -172,3 +172,24 @@ func UpdateOrganizerHandler(svc services.OrganizerService) func(c *gin.Context) 
 		})
 	}
 }
+
+func DeleteOrganizerHandler(svc services.OrganizerService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		stringID := c.Param("id")
+		id, err := uuid.Parse(stringID)
+		if err != nil {
+			log.Println(err)
+			c.Status(http.StatusBadRequest)
+			return
+		}
+
+		err = svc.Delete(c, id)
+		if err != nil {
+			log.Println(err)
+			c.Status(http.StatusNotFound)
+			return
+		}
+
+		c.Status(http.StatusOK)
+	}
+}
