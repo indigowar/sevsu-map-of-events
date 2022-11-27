@@ -343,10 +343,14 @@ Response:
   "title": "",
   "organizer": "",
   "foundingType": "",
-  "foundingRangeLow": 0,
-  "foundingRangeHigh": 15,
-  "coFoundingRangeLow": 0,
-  "coFoundingRangeHigh": 15,
+  "foundingRange": {
+    "low": 0,
+    "high": 15
+  },
+  "coFoundingRange": {
+    "low": 15,
+    "high": 25
+  },
   "submissionDeadline": "YYYY-MM-DD",
   "considerationPeriod": "",
   "realisationPeriod": "",
