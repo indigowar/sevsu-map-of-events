@@ -36,7 +36,7 @@ func (s postgresSubjectStorage) GetByID(ctx context.Context, id uuid.UUID) (mode
 		ID: id,
 	}
 
-	if err := dataSource.QueryRow(ctx, query).Scan(&subject.ID, &subject.Name, &subject.Name); err != nil {
+	if err := dataSource.QueryRow(ctx, query).Scan(&subject.ID, &subject.Name, &subject.EventID); err != nil {
 		log.Println(err)
 		return models.Subject{}, errors.New("failed to read from database")
 	}
