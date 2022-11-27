@@ -23,7 +23,7 @@ func GetAllEventHandler(svc services.EventService) gin.HandlerFunc {
 	}
 }
 
-func GetByIDEventHandler(svc services.EventService) gin.HandlerFunc {
+func GetByIDEventHandler(svc services.EventService, subjects services.SubjectService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var id uuid.UUID
 		{
@@ -41,7 +41,21 @@ func GetByIDEventHandler(svc services.EventService) gin.HandlerFunc {
 			c.Status(http.StatusNotFound)
 			return
 		}
-		c.JSON(http.StatusOK, fromModel(event))
+		subjects, err := subjects.GetAllForEvent(c, id)
+		if err != nil {
+			log.Println(err)
+			c.JSON(http.StatusOK, fromModel(event))
+			return
+		}
+		subjectsPresentation := make([]string, len(subjects))
+		for i, v := range subjects {
+			subjectsPresentation[i] = v.Name
+		}
+
+		result := fromModel(event)
+		result.Subjects = subjectsPresentation
+
+		c.JSON(http.StatusOK, result)
 	}
 }
 
@@ -172,7 +186,7 @@ type eventBinding struct {
 	InternalContacts    string      `json:"internalContacts"`
 	TRL                 int         `json:"trl"`
 	Competitors         []uuid.UUID `json:"competitors"`
-	Subjects            []uuid.UUID `json:"subjects"`
+	Subjects            []string    `json:"subjects"`
 }
 
 func fromModel(e models.Event) eventBinding {
