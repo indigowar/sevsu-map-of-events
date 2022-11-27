@@ -81,7 +81,7 @@ func Run(cfg *config.Config) {
 
 		v1.GET("/event/:id", json.GetByIDEventHandler(eventService))
 		v1.DELETE("/event/:id", json.DeleteEventHandler(eventService))
-		v1.POST("/event/:id", json.UpdateEventHandler(eventService)) // TODO: implement
+		v1.PUT("/event/:id", json.UpdateEventHandler(eventService)) // TODO: implement
 
 		v1.GET("/minimal_event", json.GetAllAsMinimalHandler(eventService))
 		v1.GET("/minimal_event/:id", json.GetByIDAsMinimalHandler(eventService))

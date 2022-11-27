@@ -477,7 +477,7 @@ DELETE `api/v1/event/{id}`
 
 Deletes the event with id
 
-POST `api/v1/event/{id}`:
+PUT `api/v1/event/{id}`:
 
 Updates info about event and returns a new value
 
