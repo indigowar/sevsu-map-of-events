@@ -79,7 +79,7 @@ func Run(cfg *config.Config) {
 		v1.GET("/event", json.GetAllEventHandler(eventService))
 		v1.POST("/event", json.CreateEventHandler(eventService))
 
-		v1.GET("/event/:id/", json.GetByIDEventHandler(eventService))
+		v1.GET("/event/:id", json.GetByIDEventHandler(eventService))
 		v1.DELETE("/event/:id", json.DeleteEventHandler(eventService))
 		v1.POST("/event/:id", json.UpdateEventHandler(eventService)) // TODO: implement
 
