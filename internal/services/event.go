@@ -109,15 +109,16 @@ func (svc eventService) Create(ctx context.Context, info services.EventCreateInf
 		return models.Event{}, err
 	}
 
-	tx, err := svc.eventStorage.BeginTransaction(ctx)
-	if err != nil {
-		log.Println(err)
-	}
-	defer func(eventStorage adapters.EventStorage, ctx context.Context, transaction interface{}) {
-		_ = eventStorage.CloseTransaction(ctx, transaction)
-	}(svc.eventStorage, ctx, tx)
-
-	serviceCtx := context.WithValue(ctx, "connection", tx)
+	// tx, err := svc.eventStorage.BeginTransaction(ctx)
+	//if err != nil {
+	//	log.Println(err)
+	//}
+	//	defer func(eventStorage adapters.EventStorage, ctx context.Context, transaction interface{}) {
+	//		_ = eventStorage.CloseTransaction(ctx, transaction)
+	//	}(svc.eventStorage, ctx, tx)
+	//
+	// serviceCtx := context.WithValue(ctx, "connection", tx)
+	serviceCtx := ctx
 
 	founding, err := svc.foundingRanges.Create(serviceCtx, info.FoundingRangeLow, info.FoundingRangeHigh)
 	if err != nil {
