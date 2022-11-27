@@ -80,7 +80,7 @@ func (svc eventService) validateCreationInfo(ctx context.Context, info services.
 	// Validate TRL
 	// TRL should be between 0 and 9
 	{
-		if info.TRL <= 0 || info.TRL >= 10 {
+		if info.TRL < 0 || info.TRL >= 10 {
 			return errors.New("invalid trl")
 		}
 	}
