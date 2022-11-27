@@ -94,7 +94,7 @@ func (s postgresEventStorage) Add(ctx context.Context, event models.Event) error
                   event_site, event_document, event_internal_contacts, event_trl)
 		VALUES 
 		(
-		 $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
+		 $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
 		)`
 
 	transaction, err := s.pool.Begin(ctx)
