@@ -50,7 +50,7 @@ func (svc rangeService) Create(ctx context.Context, low, high int) (models.Range
 }
 
 func (svc rangeService) Delete(ctx context.Context, id uuid.UUID) error {
-	return svc.Delete(ctx, id)
+	return svc.storage.Delete(ctx, id)
 }
 
 func (svc rangeService) Update(ctx context.Context, foundingRange models.RangeModel) (models.RangeModel, error) {
