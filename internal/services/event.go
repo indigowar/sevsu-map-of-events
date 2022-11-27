@@ -298,9 +298,37 @@ func (svc eventService) Update(ctx context.Context, id uuid.UUID, info services.
 		return models.Event{}, errors.New("failed to update co-founding range")
 	}
 
-	// TODO: add here update of subjects
+	err = svc.updateAllSubjects(ctx, storedEvent.ID, info.Subjects)
+	if err != nil {
+		log.Println(err)
+	}
 
 	return storedEvent, nil
+}
+
+func (svc eventService) updateAllSubjects(ctx context.Context, id uuid.UUID, subjects []string) error {
+	existedSubjects, err := svc.subjects.GetAllForEvent(ctx, id)
+	if err != nil {
+		log.Println(err)
+		return errors.New("failed to get subjects")
+	}
+
+	for _, v := range existedSubjects {
+		err := svc.subjects.Delete(ctx, v.ID)
+		if err != nil {
+			log.Println("failed to delete subject", v.ID.String(), " ", err)
+		}
+	}
+
+	for _, v := range subjects {
+		_, err := svc.subjects.Create(ctx, id, v)
+		if err != nil {
+			log.Println("failed to add subject ", v, " to event ", id.String(), ": ", err.Error())
+			return err
+		}
+	}
+
+	return nil
 }
 
 func NewEventServices(storage adapters.EventStorage,
