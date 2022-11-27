@@ -109,15 +109,6 @@ func (svc eventService) Create(ctx context.Context, info services.EventCreateInf
 		return models.Event{}, err
 	}
 
-	// tx, err := svc.eventStorage.BeginTransaction(ctx)
-	//if err != nil {
-	//	log.Println(err)
-	//}
-	//	defer func(eventStorage adapters.EventStorage, ctx context.Context, transaction interface{}) {
-	//		_ = eventStorage.CloseTransaction(ctx, transaction)
-	//	}(svc.eventStorage, ctx, tx)
-	//
-	// serviceCtx := context.WithValue(ctx, "connection", tx)
 	serviceCtx := ctx
 
 	founding, err := svc.foundingRanges.Create(serviceCtx, info.FoundingRangeLow, info.FoundingRangeHigh)
@@ -153,6 +144,13 @@ func (svc eventService) Create(ctx context.Context, info services.EventCreateInf
 	if err := svc.eventStorage.Add(serviceCtx, event); err != nil {
 		log.Println(err)
 		return models.Event{}, errors.New("failed to create - event")
+	}
+
+	for _, v := range info.Competitors {
+		err := svc.eventStorage.AddCompetitor(serviceCtx, eventId, v)
+		if err != nil {
+			log.Println(err)
+		}
 	}
 
 	subjects := make([]uuid.UUID, len(info.Subjects))

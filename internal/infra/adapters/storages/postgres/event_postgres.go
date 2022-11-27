@@ -97,15 +97,6 @@ func (s postgresEventStorage) Add(ctx context.Context, event models.Event) error
 		 $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
 		)`
 
-	// transaction, err := s.pool.Begin(ctx)
-	//if err != nil {
-	//	log.Println(err)
-	//	return errors.New("failed to start a transaction")
-	//}
-	//defer func(transaction pgx.Tx, ctx context.Context) {
-	//	_ = transaction.Rollback(ctx)
-	//}(transaction, ctx)
-
 	_, err := s.pool.Exec(ctx, command,
 		event.ID, event.Title, event.Organizer, event.FoundingType, event.FoundingRange,
 		event.CoFoundingRange, event.SubmissionDeadline, event.ConsiderationPeriod, event.RealisationPeriod,
